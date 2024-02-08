@@ -1,0 +1,15 @@
+dialog{
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    margin: -170px auto;
+    height: 60%;
+    z-index: 1000;
+}
+
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: textfield;
+    appearance: none;
+}
