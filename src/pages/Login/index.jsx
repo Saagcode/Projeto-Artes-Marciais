@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import Container from '../../components/container'
+import Container from '../../../src/components/container'
 import logo_selvagem from '../../../public/logoSelvagem.png'
 import Footer from '../../components/Footer'
 import logoFight from '../../../public/logoFight.png'
