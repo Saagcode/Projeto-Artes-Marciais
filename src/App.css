@@ -57,6 +57,14 @@ h1 p {
     }
 }
 
+.onlyPendingcheckbox {
+    margin: 15px;
+}
+
+.onlyPendingLearners {
+    align-items: center;
+}
+
 #btn_confirm {
     border: none;
     color: var(--primary);
@@ -75,7 +83,7 @@ h1 p {
     background: #ffbb00;
     border-radius: 20px;
     font-size: 1.3rem;
-    opacity: 0.6;
+    opacity: 1;
 }
 
 #btn_confirm:hover {
@@ -83,7 +91,7 @@ h1 p {
     border-left: 1px #000000 solid;
     border-right: 1px #000000 solid;
     opacity: 1;
-    transition: 0.5s;
+    transition: 0.9s;
     scale: 1.1;
 }
 
@@ -102,18 +110,18 @@ div .typeBox {
     border-right: none;
     color: black;
     background: transparent;
-    opacity: 0.6;
+    opacity: 1;
     transition: 0.5s;
     padding: 5px;
 }
 
 label {
     font-size: 1.5rem;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Comfortaa', sans-serif;
 }
 
 div .typeBox:hover {
-    opacity: 1;
+    opacity: 0.9;
     background: whitesmoke;
 }
 
@@ -172,7 +180,7 @@ td .btn_tableBack {
 #btn_edit_learner.btn_add {
     background-color: #ffbb00;
     padding: 5px;
-    margin: 15px 0px 20px 0;
+    margin: 15px 0px 0px 0;
     width: 100%;
     color: white;
     font-size: 12pt;
@@ -181,14 +189,15 @@ td .btn_tableBack {
     border-bottom: none;
     border-top: none;
     border-radius: 20px;
-    opacity: 0.5;
+    opacity: 1;
     transition: 1s;
 }
 
 #btn_edit_learner {
     background-color: #ffbb00;
     padding: 5px;
-    width: 100%;
+    width: 35%;
+    height: 40px;
     color: white;
     font-size: 12pt;
     border-left: 1px var(--white) solid;
@@ -196,15 +205,27 @@ td .btn_tableBack {
     border-bottom: none;
     border-top: none;
     border-radius: 20px;
-    opacity: 0.5;
-    transition: 1s;
-}
+    opacity: 1;
+    animation: slide2 1s linear forwards;
+    transition: 0.5s;
+    }
+
+    @keyframes slide2 {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
 
 #btn_edit_learner:hover {
     color: var(--white);
     border-left: 1px var(--primary) solid;
     border-right: 1px var(--primary) solid;
-    opacity: 1;
+    opacity: 0.9;
     transition: 0.5s;
     scale: 1.1;
 }
@@ -213,26 +234,23 @@ td .btn_tableBack {
     color: var(--white);
     border-left: 1px var(--primary) solid;
     border-right: 1px var(--primary) solid;
-    opacity: 1;
+    opacity: 0.9;
     transition: 0.5s;
 }
 
 td span {
     transition: 0.5s;
+    color: var(--white);
+    cursor: pointer;
 }
 
-td span:hover {
-    color: var(--white);
-    opacity: 1;
-    transition: 0.5s;
-}
 
 .button_dell_edit {
-    padding: 10px;
+    padding: auto;
     scale: 0.7;
     background-color: #ffbb00;
     margin: 0px;
-    height: 50px;
+    height: auto;
     font-size: 12pt;
     vertical-align: middle;
     width: 50px;
@@ -242,7 +260,7 @@ td span:hover {
     border-top: none;
     border-radius: 20px;
     margin-left: 10px;
-    opacity: 0.5;
+    opacity: 1;
     transition: 1s;
 }
 
@@ -250,15 +268,22 @@ td span:hover {
     color: var(--white);
     border-left: 1px var(--primary) solid;
     border-right: 1px var(--primary) solid;
-    opacity: 1;
+    opacity: 0.9;
     transition: 0.5s;
 }
 
-#btn_container {
-    width: 69%;
+.btn_container {
+    width: 40%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    margin: 10px auto;
+    justify-content: end;
+    align-items: center;
+}
+
+.btn_new-learner_container {
+    width: 10%;
+    display: flex;
+    justify-content: space-between;
 }
 
 div .template {
@@ -286,17 +311,19 @@ div .template {
 
 #btn_exit {
     border: none;
-    position: relative;
-    left: 60px;
-    top: 60px;
+    float: right;
+    display: flex;
+    margin: auto 30px;
     opacity: 1;
-    width: 100%;
     transition: 0.6s;
 }
 
 #btn_exit:hover {
+    border: none;
+    float: right;
+    display: flex;
+    margin: auto 30px;
     opacity: 0.5;
-    width: 100%;
     transition: 0.6s;
     transform: rotate(10deg);
 }
@@ -305,8 +332,6 @@ div .template {
     margin-top: 11px;
     text-decoration: none;
     color: black;
-    position: absolute;
-    margin-right: 10px;
     font-size: 10pt;
     transition: 1s;
     opacity: 0;
@@ -314,8 +339,6 @@ div .template {
 
 label:hover #link_exit {
     transition: 1s;
-    margin-left: 7px;
-    margin-right: 0;
     opacity: 1;
 }
 
@@ -353,10 +376,10 @@ label:hover #link_exit {
     align-items: center;
     justify-content: center;
     margin: auto;
-    width: 30%;
+    width: 60%;
     height: auto;
     border: none;
-    overflow: scroll;
+
     border-radius: 10px;
     box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.4);
     animation: optdialog 0.5s linear forwards;
@@ -382,7 +405,7 @@ label:hover #link_exit {
     top: 0px;
     right: 0px;
     border: none;
-    opacity: 0.3;
+    opacity: 1;
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -410,7 +433,7 @@ label:hover #link_exit {
     vertical-align: middle;
     justify-content: center;
     display: inline-flex;
-    width: 70%;
+    width: 90%;
     height: 90%;
     margin-bottom: 0px;
     padding: 25px 0;
@@ -438,7 +461,6 @@ label:hover #link_exit {
 .boxInput:hover {
     background-color: #cecece6b;
     transition: 1s;
-    scale: 1.125;
 }
 
 #title_data {
@@ -455,6 +477,14 @@ label:hover #link_exit {
 
 #title_data {
     padding-left: 20px;
+}
+
+span#title_data_text {
+    font-size: 12pt;
+    margin: 0px;
+    font-size: 12pt;
+    padding-left: 20px;
+    animation: borderleft 2s linear forwards;
 }
 
 form p {
@@ -566,12 +596,12 @@ div#colors .color:hover {
     width: 70%;
     margin-left: 90px;
     justify-content: space-around;
-    opacity: 0.5;
+    opacity: 1;
     transition: 0.5s;
 }
 
 #container_beltdegree:hover {
-    opacity: 1;
+    scale: 1.02;
     transition: 0.5s;
 }
 
@@ -587,7 +617,7 @@ div#colors .color:hover {
 }
 
 select#paymentdone {
-    margin: 3px 6px;
+    margin: 3px 10px;
     font-size: 10pt;
 }
 
@@ -612,27 +642,36 @@ select {
     bottom: 20px;
 }
 
+#buttons_save_back{
+    margin: 30px 0 0 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .btn_show_bill {
     background-color: #ffbb00;
     padding: 10px;
-    width: 100%;
+    margin: 10px 0;
+    height: 40px;
+    width: 40%;
     color: white;
-    font-size: 10pt;
+    font-size: 12pt;
     justify-content: center;
     border-left: 1px var(--white) solid;
     border-right: 1px var(--white) solid;
     border-bottom: none;
     border-top: none;
     border-radius: 20px;
-    opacity: 0.5;
+    opacity: 1;
     transition: 1s;
 }
 
 .btn_show_bill:hover {
-    color: var(--white);
     border-left: 1px var(--primary) solid;
     border-right: 1px var(--primary) solid;
-    opacity: 1;
+    opacity: 0.9;
     transition: 0.5s;
     scale: 1.1;
 }
@@ -642,20 +681,36 @@ select {
 }
 
 span#title_data {
-    font-size: 11pt;
+    font-size: 12pt;
 }
 
 #btn_edit_learner.button_new-learner {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-around;
-    position: absolute;
-    width: 40%;
-    left: 70px;
-    bottom: 25px;
+    height: 40%;
+    width: 99%;
+    margin: 22px 0px;
+    left: 0px;
+    bottom: 0px;
 }
 
 @media screen and (max-width: 900px) {
+    #btn_edit_learner {
+        background-color: #ffbb00;
+        padding: 5px;
+        width: 40%;
+        height: 40px;
+        color: white;
+        font-size: 12pt;
+        border-left: 1px var(--white) solid;
+        border-right: 1px var(--white) solid;
+        border-bottom: none;
+        border-top: none;
+        border-radius: 20px;
+        opacity: 1;
+        animation: slide2 1s linear forwards;
+    }
     .template caption {
         position: relative;
         left: 230px;
@@ -685,7 +740,15 @@ span#title_data {
     }
 
     #container_beltdegree {
+        margin: 20px auto;
+    }
+
+    .btn_container {
+        width: 85%;
+        display: flex;
         margin: 50px auto;
+        justify-content: end;
+        align-items: center;
     }
 
     .containerField #btn_edit {
@@ -707,7 +770,10 @@ span#title_data {
         border: none;
     }
 
- 
+    select#paymentdone {
+        margin: 3px 6px;
+        font-size: 10pt;
+    }
 
     .table {
         font-size: 10pt;
@@ -718,36 +784,53 @@ span#title_data {
     }
 
 
-    div.template{
+    div.template {
         margin-top: -230px;
     }
 
 
     .button_dell_edit {
-        font-size: 12pt;
-        height: 40px;
-        width: 85%;
-        justify-content: space-between;
-        margin: 10px;
-    }
-
-    .btn_show_bill {
+        padding: auto;
+        scale: 0.7;
         background-color: #ffbb00;
-        padding: 0px 15px;
-        margin: 20px 0;
-        width: 100%;
-        height: 30px;
-        color: white;
-        font-size: 10pt;
+        margin: 0px;
+        height: auto;
+        font-size: 12pt;
+        vertical-align: middle;
+        width: 50px;
         border-left: 1px var(--white) solid;
         border-right: 1px var(--white) solid;
         border-bottom: none;
         border-top: none;
         border-radius: 20px;
-        opacity: 0.5;
+        margin-left: 10px;
+        opacity: 1;
         transition: 1s;
-        animation: slide 2s linear forwards;
-    
+    }
+
+    #buttons_save_back{
+        width: 100%;
+        margin: 30px 0 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn_show_bill {
+        background-color: #ffbb00;
+        padding: 0px 15px;
+        margin: 0px 0;
+        width: 40%;
+        height: 40px;
+        color: white;
+        font-size: 12pt;
+        border-left: 1px var(--white) solid;
+        border-right: 1px var(--white) solid;
+        border-bottom: none;
+        border-top: none;
+        border-radius: 20px;
+        animation: slide 1s linear forwards;
+
     }
 
     @keyframes slide {
@@ -779,14 +862,10 @@ span#title_data {
         justify-content: space-around;
         position: absolute;
         width: 40%;
+        height: 5%;
         left: 110px;
-        bottom: 35px;
-    }
-
-    #title_data {
-        padding-left: 20px;
-        margin-left: 30px;
-        animation: borderleft 2s linear forwards;
+        bottom: -5px;
+        
     }
 
 
@@ -797,10 +876,15 @@ span#title_data {
         top: -70px;
     }
 
+    #learner_id {
+        margin: 42px;
+    }
+
     input.btn_add_bills {
         background-color: #ffbb00;
         width: 34%;
         height: 25px;
+        margin-top: 10px;
         color: white;
         font-size: 7pt;
         text-align: center;
@@ -809,31 +893,29 @@ span#title_data {
         border-bottom: none;
         border-top: none;
         border-radius: 20px;
-        opacity: 0.5;
+        opacity: 1;
         transition: 1s;
         display: inline;
         float: right;
-        margin-left: 0px;
+        margin-right: 20px;
     }
 
     input.btn_add_bills:hover {
         color: var(--white);
         border-left: 1px var(--primary) solid;
         border-right: 1px var(--primary) solid;
-        opacity: 1;
+        opacity: 0.9;
         transition: 0.5s;
         scale: 1.1;
     }
 
-    #btn_edit_learner {
-        position: relative;
-        bottom: 10px;
-    }
-
     #btn_exit {
-        position: relative;
-        top: 45px;
-
+        border: none;
+        float: right;
+        display: flex;
+        margin: auto 15px;
+        opacity: 1;
+        transition: 0.6s;
     }
 
     #btn_confirm {
@@ -921,7 +1003,27 @@ span#title_data {
     }
 
     span#title_data {
-        font-size: 11pt;
+        font-size: 12pt;
+        margin: 0px;
+        font-size: 12pt;
+        padding-left: 20px;
+        animation: borderleft 2s linear forwards;
+    }
+
+    span#title_data_text {
+        font-size: 12pt;
+        margin: 40px;font-size: 12pt;
+        padding-left: 20px;
+        animation: borderleft 2s linear forwards;
+    }
+
+    #container_name{
+        width: 100%;
+        padding: 20px;
+        margin: 0px 20px;
+        text-indent: -40px;
+        text-align: left;
+        margin-bottom: -50px;
     }
 
     #interface {
@@ -949,6 +1051,7 @@ span#title_data {
     h1,
     label,
     input.typeBox {
+        font-family: 'Comfortaa', sans-serif;
         font-size: 12pt;
     }
 }
@@ -1068,16 +1171,16 @@ input.btn_add_bill {
     padding: 0px 15px;
     height: 30px;
     color: white;
-    font-size: 7pt;
+    font-size: 10pt;
     border-left: 1px var(--white) solid;
     border-right: 1px var(--white) solid;
     border-bottom: none;
     border-top: none;
     border-radius: 20px;
-    opacity: 0.5;
+    opacity: 1;
     transition: 1s;
-    width: 35%;
-    margin-left: 200px;
+    width: 25%;
+    margin-right: 8px;
     display: inline;
     float: right;
 }
@@ -1086,7 +1189,7 @@ input.btn_add_bills:hover {
     color: var(--white);
     border-left: 1px var(--primary) solid;
     border-right: 1px var(--primary) solid;
-    opacity: 1;
+    opacity: 0.9;
     transition: 0.5s;
     scale: 1.1;
 }
@@ -1099,8 +1202,8 @@ dialog.modalLoading {
     align-items: center;
     justify-content: center;
     margin: auto;
-    width: 6%;
-    padding-left: 15px;
+    width: 30%;
+    padding-left: 10px;
     border: none;
     overflow: hidden;
     border-radius: 50px;
@@ -1139,7 +1242,7 @@ dialog.modalLoading_error {
     align-items: center;
     justify-content: center;
     margin: auto;
-    width: 30%;
+    width: 65%;
     height: auto;
     border: none;
     border-radius: 20px;
@@ -1147,7 +1250,8 @@ dialog.modalLoading_error {
 }
 
 .error {
+    text-align: center;
+    width: 100%;
     padding: 10px;
     transition: 1s;
 }
-

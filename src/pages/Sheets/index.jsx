@@ -5,7 +5,7 @@ import logout from '../../../public/logout.png'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Table from 'react-bootstrap/Table'
-import { startOfDay, addDays } from 'date-fns'
+import { isToday } from 'date-fns'
 import '@fortawesome/fontawesome-free/css/all.css';
 import Api from '../../services/Api';
 import { FormatDate, FormatCurrency, TranslateStatus } from '../../services/UtilityServices';
@@ -29,6 +29,8 @@ function Sheets() {
     const [selectedLearner, setSelectedLearner] = useState();
     const [invoices, setInvoices] = useState([]);
 
+    const [onlyPendingLearners, setOnlyPendingLearners] = useState(false)
+
     const handleRemove = (learnerId) => {
         setLearners(prevLearners => prevLearners.filter(iterationLearner => iterationLearner.id !== learnerId));
     };
@@ -46,12 +48,18 @@ function Sheets() {
     const [paymentDate, setPaymentDate] = useState();
     const [degree, setDegree] = useState('');
     const [isFirstInvoicePaid, setIsFirstInvoicePaid] = useState('');
-
     const [loadingInvoices, setLoadingInvoices] = useState(false);
+
+    useEffect(() => {
+        const today = new Date();
+        setPaymentDate(today.toISOString().split('T')[0]);
+    }, []);
 
     const handleSubmit = () => {
         if (!name || !phone || !paymentDate || !selectRadio || !degree || !isFirstInvoicePaid) {
             return window.alert('Informe todos os parâmetros')
+        } else {
+            closeModal(true)
         }
 
         // :00:00.000Z
@@ -100,14 +108,6 @@ function Sheets() {
         getLearners();
     }, [])
 
-    const today = new Date();
-    const tomorrow = startOfDay(addDays(today, 0));
-
-    const [userSelection, setSelection] = useState(null)
-    const changedate = (event) => {
-        const selection = new Date(event.target.value)
-        setSelection(selection)
-    }
 
     /* select pagamento pendente */
     const [newInvoiceStatus, setNewInvoiceStatus] = useState(null)
@@ -121,9 +121,6 @@ function Sheets() {
     /* radio das faturas */
     const [selectRadioFatura, setSelectRadioFatura] = useState(null)
 
-    const optChangeFatura = (event) => {
-        setSelectRadioFatura(event.target.value)
-    }
     /* radio das faturas */
 
     /* radio das faixas */
@@ -164,6 +161,68 @@ function Sheets() {
 
     const [modalOpen, setModalOpen] = useState(false);
 
+    const [editingModalId, setEditingModalId] = useState();
+    const [editingModalName, setEditingModalName] = useState('');
+    const [editingModalPhone, setEditingModalPhone] = useState('');
+    const [editingModalPaymentDate, setEditingModalPaymentDate] = useState();
+    const [editingModalBeltColor, setEditingModalBeltColor] = useState('');
+    const [editingModalDegree, setEditingModalDegree] = useState('');
+
+    const handleOpenEditingModal = editingLearner => {
+        setEditingModalId(editingLearner.id)
+        setEditingModalName(editingLearner.name)
+        setEditingModalPhone(editingLearner.phone)
+        setEditingModalPaymentDate(new Date(editingLearner.expiringDate))
+        setEditingModalBeltColor(editingLearner.beltColor)
+        setEditingModalDegree(editingLearner.degree)
+    }
+
+    const handleCloseEditingModal = () => {
+        setEditingModalId()
+        setEditingModalName('')
+        setEditingModalPhone('')
+        setEditingModalPaymentDate()
+        setEditingModalBeltColor('')
+        setEditingModalDegree('')
+    }
+
+    const handleUpdateLearner = () => {
+       if (
+            !editingModalId ||
+            !editingModalName ||
+            !editingModalPhone ||
+            !editingModalPaymentDate ||
+            !editingModalBeltColor ||
+            !editingModalDegree
+        ) 
+            return window.alert('Preencha todas as informações')
+
+        const timezoneFixedDate = typeof editingModalPaymentDate === 'string' ?  new Date(editingModalPaymentDate.slice(0, 11) + 'T' + '03' + ':00:00.000Z') : editingModalPaymentDate;
+
+        const requestBody = {
+            name: editingModalName,
+            phone: editingModalPhone,
+            beltColor: editingModalBeltColor,
+            degree: +editingModalDegree,
+            subscriptionPrice: 135,
+            expiringDate: timezoneFixedDate,
+        }
+
+        Api.put(`clients/1/learners/${editingModalId}/update`, requestBody, {
+            headers: {
+                authorization: `Bearer ${authorizationKey}`
+            }
+        }).then(({ data: newLearner }) => {
+            handleCloseEditingModal();
+
+            getLearners();
+
+            window.alert('Atualizado com sucesso!')
+        }).catch(error => {
+            window.alert('Houve um problema, tente novamente mais tarde')
+        })
+    }
+
     const openModal = () => {
         setModalOpen(true);
     };
@@ -177,17 +236,24 @@ function Sheets() {
     const [datedue, setDatedue] = useState(null);
     const [openModalLoading, setOpenModalLoading] = useState(false);
 
+    useEffect(() => {
+        const today = new Date();
+        setDatedue(today.toISOString().split('T')[0]);
+    })
+
     const handleCreateInvoice = () => {
         if (!price || !datedue || !newInvoiceStatus) {
             e.preventDefault();
             return window.alert('Preencha todos os dados solicitados!')
+        } else {
+            setSelectRadioFatura(true)
         }
 
         if (!selectedLearner) {
             setTimeout(() => {
                 window.location.reload()
             }, 1500)
-            
+
             return window.alert('Houve um erro tente novamente mais tarde')
         }
 
@@ -232,9 +298,9 @@ function Sheets() {
 
             if (openModalLoading)
                 return;
-    
+
             setOpenModalLoading(true);
-    
+
             // get - le
             // post - cria
             // put - atualiza varias coisas
@@ -250,31 +316,57 @@ function Sheets() {
                     ...itInvoice,
                     status: 'paid'
                 } : itInvoice))
-    
+
                 setSelectRadioFatura('nao')
-    
+
                 setOpenModalLoading(false);
-    
+
                 if (!isExtraInvoice) {
                     getLearners();
                 }
             }).catch(error => {
                 ErrorService({ error });
-    
+
                 setOpenModalLoading(false);
             })
         });
     }
 
+    const renderSituation = lastPaymentDate => {
+        const date = new Date(lastPaymentDate);
+
+        const now = new Date();
+
+        if (isToday(date))
+            return <span style={{ color: '#F9A826' }}>Vence hoje</span>
+
+        if (date > now)
+            return <span style={{ color: '#00B0FF' }}>Regular</span>
+
+        if (date < now)
+            return <span style={{ color: '#e02041' }}>ATRASADO</span>
+    }
+
     return (
         <>
-            <div id='btn_container'>
+            <div className='btn_container'>
+                <div id='container_pendinglearners'>
+                    <span className='onlyPendingLearners'>Apenas pagamentos pendentes</span>
+                    <input
+                        className='onlyPendingcheckbox'
+                        type="checkbox"
+                        onClick={() => setOnlyPendingLearners(!onlyPendingLearners)}
+                        checked={onlyPendingLearners}
+                    />
+                </div>
+                <input type="button" value="+ Novo Aluno" id='btn_edit_learner' onClick={openModal} />
                 <label htmlFor="btn_exit">
                     <button id='btn_exit' onClick={() => handleLogout()}>
                         <img src={logout} alt="btn_exit" />
                         <span id='link_exit'>SAIR</span>
                     </button>
                 </label>
+                <div />
                 <label htmlFor="btn_add">
 
                     {modalOpenFatura && (
@@ -286,7 +378,6 @@ function Sheets() {
                                         {selectRadioFatura === 'sim' ? (
                                             <fieldset className='containerField'>
 
-                                                <input type="button" value="Voltar" className='btn_show_bill' onClick={() => setSelectRadioFatura('nao')} />
                                                 <legend>
                                                     <span id='title_data'>Registrar Fatura</span>
                                                 </legend>
@@ -309,38 +400,31 @@ function Sheets() {
                                                             <option value='pendente'>Pendente</option>
                                                             <option value='Pago'>Pago</option>
                                                         </select>
-                                                        {newInvoiceStatus === 'pendente' ? (
-                                                            <div style={{ transition: '0.6s', opacity: '1' }}>
-                                                                <label htmlFor='check_paid' className='check_paid' >Marcar como pago</label>
-                                                                <input type='checkbox' className='check_paid' />
-                                                            </div>
-                                                        ) :
-                                                            <div style={{ transition: '0.6s', opacity: '0' }}>
-                                                                <label htmlFor="check_paid" className='check_paid' >Marcar como pago</label>
-                                                                <input type="checkbox" className='check_paid' />
-                                                            </div>
-                                                        }</p>
+                                                    </p>
                                                 </div>
-                                                <button id='btn_edit_learner' onClick={(e) => {
-                                                    e.preventDefault();
+                                                <div id='buttons_save_back'>
+                                                    <button id='btn_edit_learner' onClick={(e) => {
+                                                        e.preventDefault();
 
-                                                    handleCreateInvoice()
-                                                }}>
-                                                    <span>Salvar</span>
-                                                </button>
-                                                {openModalLoading && (
-                                                    <div className='backdrop'>
-                                                        <dialog className='modalLoading'>
-                                                            <div className='loader'>
-                                                                <FadeLoader
-                                                                    color='#ffbb00'
-                                                                    size={100}
-                                                                    loading={true}
-                                                                />
-                                                            </div>
-                                                        </dialog>
-                                                    </div>
-                                                )}
+                                                        handleCreateInvoice()
+                                                    }}>
+                                                        <span>Salvar</span>
+                                                    </button>
+                                                    <input type="button" value="Voltar" className='btn_show_bill' onClick={() => setSelectRadioFatura('nao')} />
+                                                    {openModalLoading && (
+                                                        <div className='backdrop'>
+                                                            <dialog className='modalLoading'>
+                                                                <div className='loader'>
+                                                                    <FadeLoader
+                                                                        color='#ffbb00'
+                                                                        size={100}
+                                                                        loading={true}
+                                                                    />
+                                                                </div>
+                                                            </dialog>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </fieldset>
                                         ) : (
                                             <div className='backdrop_modal_close'>
@@ -349,61 +433,69 @@ function Sheets() {
                                                         <fieldset className='containerField'>
                                                             <legend>
                                                                 <input type="button" value="X" id='dialog_btn' onClick={closeModalFatura} />
-                                                                <span id='title_data'>Faturas Registradas: {selectedLearner ? `${selectedLearner.id} - ${selectedLearner.name}` : ''}
-                                                                    <input type="button" value="Adicionar Fatura" className='btn_add_bills' onClick={() => setSelectRadioFatura('sim')} />
+                                                                <span id='title_data_text'>Faturas Registradas: <br /><input type="button" value="Adicionar Fatura" className='btn_add_bills' onClick={() => setSelectRadioFatura('sim')} /><br />
+
+                                                                    <div id='container_name'>
+                                                                        <span id='learner_id'>
+                                                                            {selectedLearner ?
+                                                                                `${selectedLearner.id} | Aluno: ${selectedLearner.name}` : ''}
+                                                                        </span>
+                                                                    </div>
                                                                 </span>
                                                             </legend>
 
                                                             {loadingInvoices ? (
-                                                                    <div className='backdrop'>
-                                                                        <dialog className='modalLoading'>
-                                                                            <div className='loader'>
-                                                                                <FadeLoader
-                                                                                    color='#ffbb00'
-                                                                                    size={100}
-                                                                                    loading={true}
-                                                                                />
-                                                                            </div>
-                                                                        </dialog>
-                                                                    </div>
+                                                                <div className='backdrop'>
+                                                                    <dialog className='modalLoading'>
+                                                                        <div className='loader'>
+                                                                            <FadeLoader
+                                                                                color='#ffbb00'
+                                                                                size={100}
+                                                                                loading={true}
+                                                                            />
+                                                                        </div>
+                                                                    </dialog>
+                                                                </div>
                                                             ) : (
-                                                                <Table striped bordered hover size="sm">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th className='table__tittle'>ID</th>
-                                                                            <th className='table__tittle'>Valor</th>
-                                                                            <th className='table__tittle'>Data de vencimento</th>
-                                                                            <th className='table__tittle'>Status</th>
-                                                                            <th className='table__tittle'>Fatura extra?</th>
-                                                                            <th className='table__tittle'>Observação</th>
-                                                                            <th></th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        {invoices.map(iterationInvoice => (
+                                                                <div style={{ overflow: 'scroll' }}>
+                                                                    <Table striped bordered hover size="sm">
+                                                                        <thead>
                                                                             <tr>
-                                                                                <td className='back'>{iterationInvoice.id}</td>
-                                                                                <td className='back'>{FormatCurrency(iterationInvoice.value)}</td>
-                                                                                <td className='back'>{FormatDate({ date: iterationInvoice.dueDate })}</td>
-                                                                                <td>{TranslateStatus({ dueDate: new Date(iterationInvoice.dueDate), status: iterationInvoice.status })}</td>
-                                                                                <td>{iterationInvoice.isExtraInvoice ? 'Sim' : 'Não'}</td>
-                                                                                <td>{iterationInvoice.observation}</td>
-                                                                                <td>
-                                                                                    {iterationInvoice.status === 'pending' && (
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            style={{ scale: '0.8' }}
-                                                                                            className='button_dell_edit'
-                                                                                            onClick={() => handleMarkAsPaid(iterationInvoice.id, iterationInvoice.isExtraInvoice)}
-                                                                                        >
-                                                                                            👍
-                                                                                        </button>
-                                                                                    )}
-                                                                                </td>
+                                                                                <th className='table__tittle'>ID</th>
+                                                                                <th className='table__tittle'>Valor</th>
+                                                                                <th className='table__tittle'>Data de vencimento</th>
+                                                                                <th className='table__tittle'>Status</th>
+                                                                                <th className='table__tittle'>Fatura extra?</th>
+                                                                                <th className='table__tittle'>Observação</th>
+                                                                                <th></th>
                                                                             </tr>
-                                                                        ))}
-                                                                    </tbody>
-                                                                </Table>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {invoices.map(iterationInvoice => (
+                                                                                <tr>
+                                                                                    <td className='back'>{iterationInvoice.id}</td>
+                                                                                    <td className='back'>{FormatCurrency(iterationInvoice.value)}</td>
+                                                                                    <td className='back'>{FormatDate({ date: iterationInvoice.dueDate })}</td>
+                                                                                    <td>{TranslateStatus({ dueDate: new Date(iterationInvoice.dueDate), status: iterationInvoice.status })}</td>
+                                                                                    <td>{iterationInvoice.isExtraInvoice ? 'Sim' : 'Não'}</td>
+                                                                                    <td>{iterationInvoice.observation}</td>
+                                                                                    <td>
+                                                                                        {iterationInvoice.status === 'pending' && (
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                style={{ scale: '0.8' }}
+                                                                                                className='button_dell_edit'
+                                                                                                onClick={() => handleMarkAsPaid(iterationInvoice.id, iterationInvoice.isExtraInvoice)}
+                                                                                            >
+                                                                                                <span className='fa-regular fa-pen-to-square'></span>
+                                                                                            </button>
+                                                                                        )}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))}
+                                                                        </tbody>
+                                                                    </Table>
+                                                                </div>
                                                             )}
                                                         </fieldset>
                                                     </form>
@@ -415,7 +507,6 @@ function Sheets() {
                             </dialog>
                         </div>
                     )}
-                    <input style={{ padding: '10px' }} type="button" value="+ Novo Aluno" id='btn_edit_learner' className='btn_add' onClick={openModal} />
                 </label >
             </div >
             <Container>
@@ -450,8 +541,9 @@ function Sheets() {
                                             </div>
                                         </div>
                                     </div>
-
-
+                                    <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleSubmit()}>
+                                        <span class="fa-solid fa-plus"></span>
+                                    </button>
                                 </fieldset>
                                 <fieldset className='containerField'>
                                     <div id='container_beltdegree'><div className='inline'><p>Faixa</p>
@@ -476,9 +568,61 @@ function Sheets() {
                                             </select>
                                         </div>
                                     </div>
-                                    <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleSubmit()}>
+                                </fieldset>
+                            </form>
+                        </dialog>
+                    </div>
+                )}
+                {editingModalId && (
+                    <div className='backdrop_modal_close'>
+                        <dialog id='dialog' open className='dialog_new-learner'>
+                            <input type="button" value="X" id='dialog_btn' onClick={closeModal} />
+                            <form id='data' style={{ width: '85%' }}>
+                                <fieldset className='containerField'>
+                                    <legend>
+                                        <span id='title_data'>Dados pessoais do aluno</span>
+                                    </legend>
+                                    <div>
+                                        <p>Nome</p>
+                                        <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '98%' }} value={editingModalName} onChange={e => setEditingModalName(e.target.value)} />
+                                    </div>
+                                    <div id='phone_mail'>
+                                        <div className='line' style={{ width: '100%' }}><p>Telefone</p><input type="number" className='boxInput' placeholder='(     ) ___ ____________-____________ ' value={editingModalPhone} onChange={e => setEditingModalPhone(e.target.value)} /></div>
+                                    </div>
+
+                                    <div id='phone_mail'>
+                                        <div id='container___phone-mail'>
+
+                                            <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
+                                        </div>
+                                    </div>
+                                    <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleUpdateLearner()}>
                                         <span class="fa-solid fa-plus"></span>
                                     </button>
+                                </fieldset>
+                                <fieldset className='containerField'>
+                                    <div id='container_beltdegree'><div className='inline'><p>Faixa</p>
+                                        <div id='colors'>
+                                            {beltColors.map(itBeltColor => (
+                                                <>
+                                                    <label htmlFor={itBeltColor}>
+                                                        <input type="radio" className='Radio' value={itBeltColor} checked={editingModalBeltColor === itBeltColor} onClick={() => setEditingModalBeltColor(itBeltColor)} />
+                                                    </label>
+                                                    <div id={itBeltColor} className='color' onClick={() => setEditingModalBeltColor(itBeltColor)}></div>
+                                                </>
+                                            ))}
+                                        </div>
+                                    </div>
+                                        <div className='inline'><p>Grau</p>
+                                            <select name="ndegree" id="idegree" value={editingModalDegree} onChange={e => setEditingModalDegree(e.target.value)} >
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </fieldset>
                             </form>
                         </dialog>
@@ -489,26 +633,40 @@ function Sheets() {
                     <Table striped bordered hover size="sm">
                         <thead>
                             <tr>
+                                <th className='table__tittle'>Id</th>
                                 <th className='table__tittle'>Nome</th>
                                 <th className='table__tittle'>Telefone</th>
                                 <th className='table__tittle'>Faixa</th>
                                 <th className='table__tittle'>Grau</th>
                                 <th className='table__tittle'>Ultimo Pagamento</th>
                                 <th className='table__tittle'>Proximos Vencimentos</th>
+                                <th className='table__tittle'>Situação</th>
+                                <th className='table__tittle'></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {learners.map(iterationLearner => (
+                            {learners.filter(iterationLearner => {
+                                if (!onlyPendingLearners)
+                                    return true;
+
+                                const learnerExpiringDate = new Date(iterationLearner.expiringDate);
+
+                                const now = new Date();
+
+                                return isToday(learnerExpiringDate) || learnerExpiringDate < now;
+                            }).map(iterationLearner => (
                                 <tr key={iterationLearner.id}>
+                                    <td className='back'>{iterationLearner.id}</td>
                                     <td className='back'>{iterationLearner.name}</td>
                                     <td className='back'>{iterationLearner.phone}</td>
                                     <td id={iterationLearner.beltColor} style={{ scale: '0.4', borderRadius: '50px' }}></td>
                                     <td className='back'>{iterationLearner.degree}</td>
                                     <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
                                     <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
-                                    <td> <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '-2px' }}></span></label></button>
-                                        <button className='button_dell_edit' onClick={openModal}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '-2px', color: 'white' }} onClick={openModal}></span></label></button>
-                                        <button className='button_dell_edit' onClick={() => handleRemove(iterationLearner.id)} ><label htmlFor="fa-regular fa-trash-can"><span className='fa-regular fa-trash-can' style={{ color: 'white', position: 'relative', top: '-1px' }} ></span></label></button> </td>
+                                    <td>{renderSituation(iterationLearner.expiringDate)}</td>
+                                    <td> <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
+                                        <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }} onClick={openModal}></span></label></button>
+                                        <button className='button_dell_edit' onClick={() => handleRemove(iterationLearner.id)} ><label htmlFor="fa-regular fa-trash-can"><span className='fa-regular fa-trash-can' style={{ color: 'white', position: 'relative', top: '0px' }} ></span></label></button> </td>
                                 </tr>
                             ))}
                         </tbody>
