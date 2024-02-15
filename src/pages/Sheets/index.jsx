@@ -13,6 +13,7 @@ import { FadeLoader } from 'react-spinners';
 import ErrorService from '../../services/ErrorService';
 
 import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
 
 function Sheets() {
     const handleLogout = () => {
@@ -31,10 +32,6 @@ function Sheets() {
 
     const [onlyPendingLearners, setOnlyPendingLearners] = useState(false)
 
-    const handleRemove = (learnerId) => {
-        setLearners(prevLearners => prevLearners.filter(iterationLearner => iterationLearner.id !== learnerId));
-    };
-
     const beltColors = [
         'white',
         'blue',
@@ -47,8 +44,11 @@ function Sheets() {
     const [phone, setPhone] = useState('');
     const [paymentDate, setPaymentDate] = useState();
     const [degree, setDegree] = useState('');
+    const [senseiId, setSenseiId] = useState('');
     const [isFirstInvoicePaid, setIsFirstInvoicePaid] = useState('');
     const [loadingInvoices, setLoadingInvoices] = useState(false);
+
+    const [senseis, setSenseis] = useState([]);
 
     useEffect(() => {
         const today = new Date();
@@ -56,8 +56,8 @@ function Sheets() {
     }, []);
 
     const handleSubmit = () => {
-        if (!name || !phone || !paymentDate || !selectRadio || !degree || !isFirstInvoicePaid) {
-            return window.alert('Informe todos os parâmetros')
+        if (!name || !phone || !paymentDate || !selectRadio || !degree || !senseiId || !isFirstInvoicePaid) {
+            return toast.error('Informe todos os parâmetros')
         } else {
             closeModal(true)
         }
@@ -74,7 +74,8 @@ function Sheets() {
             beltColor: selectRadio,
             degree: +degree,
             isFirstInvoicePaid: isFirstInvoicePaid === 'true',
-            subscriptionPrice: 135
+            subscriptionPrice: 135,
+            senseiId: +senseiId
         }
 
         Api.post(`clients/1/learners`, requestBody, {
@@ -106,6 +107,16 @@ function Sheets() {
 
     useEffect(() => {
         getLearners();
+
+        Api.get('clients/1/senseis', {
+            headers: {
+                authorization: `Bearer ${authorizationKey}`
+            }
+        }).then(({ data }) => {
+            setSenseis(data)
+        }).catch(error => {
+            ErrorService({ error });
+        })
     }, [])
 
 
@@ -163,10 +174,11 @@ function Sheets() {
 
     const [editingModalId, setEditingModalId] = useState();
     const [editingModalName, setEditingModalName] = useState('');
-    const [editingModalPhone, setEditingModalPhone] = useState('');
+    const [editingModalPhone, setEditingModalPhone] = useState();
     const [editingModalPaymentDate, setEditingModalPaymentDate] = useState();
     const [editingModalBeltColor, setEditingModalBeltColor] = useState('');
     const [editingModalDegree, setEditingModalDegree] = useState('');
+    const [editingModalSenseiId, setEditingModalSenseiId] = useState('');
 
     const handleOpenEditingModal = editingLearner => {
         setEditingModalId(editingLearner.id)
@@ -175,52 +187,56 @@ function Sheets() {
         setEditingModalPaymentDate(new Date(editingLearner.expiringDate))
         setEditingModalBeltColor(editingLearner.beltColor)
         setEditingModalDegree(editingLearner.degree)
+        setEditingModalSenseiId(editingLearner.senseiId)
     }
 
     const handleCloseEditingModal = () => {
-        setEditingModalId()
-        setEditingModalName('')
-        setEditingModalPhone('')
-        setEditingModalPaymentDate()
-        setEditingModalBeltColor('')
-        setEditingModalDegree('')
+        setEditingModalId(false)
     }
 
     const handleUpdateLearner = () => {
-       if (
+        if (
             !editingModalId ||
             !editingModalName ||
             !editingModalPhone ||
             !editingModalPaymentDate ||
             !editingModalBeltColor ||
-            !editingModalDegree
-        ) 
-            return window.alert('Preencha todas as informações')
+            !editingModalDegree ||
+            !editingModalSenseiId
+        )
+            return toast.error('Preencha todas as informações')
 
-        const timezoneFixedDate = typeof editingModalPaymentDate === 'string' ?  new Date(editingModalPaymentDate.slice(0, 11) + 'T' + '03' + ':00:00.000Z') : editingModalPaymentDate;
 
-        const requestBody = {
-            name: editingModalName,
-            phone: editingModalPhone,
-            beltColor: editingModalBeltColor,
-            degree: +editingModalDegree,
-            subscriptionPrice: 135,
-            expiringDate: timezoneFixedDate,
-        }
+        setOpenModalLoading(true);
 
-        Api.put(`clients/1/learners/${editingModalId}/update`, requestBody, {
-            headers: {
-                authorization: `Bearer ${authorizationKey}`
+        setTimeout(() => {
+            const timezoneFixedDate = typeof editingModalPaymentDate === 'string' ? new Date(editingModalPaymentDate.slice(0, 11) + 'T' + '03' + ':00:00.000Z') : editingModalPaymentDate;
+
+            const requestBody = {
+                name: editingModalName,
+                phone: editingModalPhone,
+                beltColor: editingModalBeltColor,
+                degree: +editingModalDegree,
+                subscriptionPrice: 135,
+                expiringDate: timezoneFixedDate,
+                senseiId: +editingModalSenseiId
             }
-        }).then(({ data: newLearner }) => {
-            handleCloseEditingModal();
 
-            getLearners();
+            Api.put(`clients/1/learners/${editingModalId}/update`, requestBody, {
+                headers: {
+                    authorization: `Bearer ${authorizationKey}`
+                }
+            }).then(({ data: newLearner }) => {
+                handleCloseEditingModal(true);
+                getLearners();
+                toast.success('Atualizado com sucesso!')
 
-            window.alert('Atualizado com sucesso!')
-        }).catch(error => {
-            window.alert('Houve um problema, tente novamente mais tarde')
-        })
+            }).catch(error => {
+                toast.error('Houve um problema, tente novamente mais tarde')
+            }).finally(() => {
+                setOpenModalLoading(false);
+            });
+        }, 1000)
     }
 
     const openModal = () => {
@@ -239,12 +255,12 @@ function Sheets() {
     useEffect(() => {
         const today = new Date();
         setDatedue(today.toISOString().split('T')[0]);
-    })
+    }, []);
 
     const handleCreateInvoice = () => {
         if (!price || !datedue || !newInvoiceStatus) {
             e.preventDefault();
-            return window.alert('Preencha todos os dados solicitados!')
+            return toast.error('Preencha todos os dados solicitados!')
         } else {
             setSelectRadioFatura(true)
         }
@@ -254,7 +270,7 @@ function Sheets() {
                 window.location.reload()
             }, 1500)
 
-            return window.alert('Houve um erro tente novamente mais tarde')
+            return toast.error('Houve um erro tente novamente mais tarde')
         }
 
         if (openModalLoading)
@@ -287,14 +303,14 @@ function Sheets() {
 
     const handleMarkAsPaid = (invoiceId, isExtraInvoice) => {
         Swal.fire({
-            title: 'Tem certeza que deseja marcar essa fatura como paga?',
+            title: 'Tem certeza que deseja marcar essa mensalidade como paga?',
             text: 'Essa ação é irreversível!',
             confirmButtonText: 'Sim',
             cancelButtonText: 'Não',
             showCancelButton: true
         }).then(result => {
             if (!result.value || !result.isConfirmed)
-                return window.alert('Nada foi alterado');
+                return toast.info('Nada foi alterado');
 
             if (openModalLoading)
                 return;
@@ -347,11 +363,70 @@ function Sheets() {
             return <span style={{ color: '#e02041' }}>ATRASADO</span>
     }
 
+    const [selectSensei, setSelectSensei] = useState('');
+
+    const renderSensei = (senseiId) => {
+        const matchingSensei = senseis.find(iterationSensei => iterationSensei.id === senseiId)
+
+        return matchingSensei?.name || '- -';
+    }
+
+    // const calculoDeRaizQuadrada = (x) => {
+    //     let y = x;
+
+    //     return y;
+    // }
+
+    // const test = () => {
+    //     const testArray = [
+    //         1,
+    //         2,
+    //         3,
+    //         4,
+    //     ]
+
+    //     const arrayDasRaizesQuadradas = testArray.map(iteration => {
+    //         return calculoDeRaizQuadrada(iteration);
+    //     })
+
+    //     testArray.map(iteration => (
+    //         <td>{iteration}</td>
+    //     ))
+
+    //     testArray.forEach(iteration => {
+    //         const multiplication = iteration * 2;
+            
+    //         console.log(multiplication)
+    //     })
+
+    //     const filteredArray = testArray.filter(iteration => {
+    //         const isEven = iteration % 2 === 0;
+            
+    //         return isEven
+    //     })
+
+    //     // console.log(filteredArray);
+    // };
+
+    // useEffect(() => {
+    //     test();
+    // }, [])
+
     return (
         <>
+
             <div className='btn_container'>
+                <div id='container_senseis'>
+                        <span>Sensei: </span>
+                        <select className='sensei' onChange={(e) => setSelectSensei(e.target.value)}>
+                            <option value="">Selecione</option>
+                            {senseis.map(itSensei => (
+                                <option value={itSensei.id}>{itSensei.name}</option>
+                            ))}
+                        </select>
+                </div>
                 <div id='container_pendinglearners'>
-                    <span className='onlyPendingLearners'>Apenas pagamentos pendentes</span>
+                    <span className='onlyPendingLearners'> pagamentos pendentes:</span>
                     <input
                         className='onlyPendingcheckbox'
                         type="checkbox"
@@ -359,7 +434,7 @@ function Sheets() {
                         checked={onlyPendingLearners}
                     />
                 </div>
-                <input type="button" value="+ Novo Aluno" id='btn_edit_learner' onClick={openModal} />
+                <input type="button" value="+Novo Aluno" id='btn_edit_learner' onClick={openModal} />
                 <label htmlFor="btn_exit">
                     <button id='btn_exit' onClick={() => handleLogout()}>
                         <img src={logout} alt="btn_exit" />
@@ -377,9 +452,8 @@ function Sheets() {
                                     <fieldset className='containerField'>
                                         {selectRadioFatura === 'sim' ? (
                                             <fieldset className='containerField'>
-
                                                 <legend>
-                                                    <span id='title_data'>Registrar Fatura</span>
+                                                    <span id='title_data'>Registrar Mensalidade</span>
                                                 </legend>
 
 
@@ -433,7 +507,8 @@ function Sheets() {
                                                         <fieldset className='containerField'>
                                                             <legend>
                                                                 <input type="button" value="X" id='dialog_btn' onClick={closeModalFatura} />
-                                                                <span id='title_data_text'>Faturas Registradas: <br /><input type="button" value="Adicionar Fatura" className='btn_add_bills' onClick={() => setSelectRadioFatura('sim')} /><br />
+                                                                <span id='title_data_text'>Mensalidades Registradas: <br /><br />
+                                                                    {/* <input type="button" value="Adicionar Mensalidade" className='btn_add_bills' onClick={() => setSelectRadioFatura('sim')} /><br /> */}
 
                                                                     <div id='container_name'>
                                                                         <span id='learner_id'>
@@ -465,7 +540,7 @@ function Sheets() {
                                                                                 <th className='table__tittle'>Valor</th>
                                                                                 <th className='table__tittle'>Data de vencimento</th>
                                                                                 <th className='table__tittle'>Status</th>
-                                                                                <th className='table__tittle'>Fatura extra?</th>
+                                                                                {/* <th className='table__tittle'>Mensalidade extra?</th> */}
                                                                                 <th className='table__tittle'>Observação</th>
                                                                                 <th></th>
                                                                             </tr>
@@ -477,7 +552,7 @@ function Sheets() {
                                                                                     <td className='back'>{FormatCurrency(iterationInvoice.value)}</td>
                                                                                     <td className='back'>{FormatDate({ date: iterationInvoice.dueDate })}</td>
                                                                                     <td>{TranslateStatus({ dueDate: new Date(iterationInvoice.dueDate), status: iterationInvoice.status })}</td>
-                                                                                    <td>{iterationInvoice.isExtraInvoice ? 'Sim' : 'Não'}</td>
+                                                                                    {/* <td>{iterationInvoice.isExtraInvoice ? 'Sim' : 'Não'}</td> */}
                                                                                     <td>{iterationInvoice.observation}</td>
                                                                                     <td>
                                                                                         {iterationInvoice.status === 'pending' && (
@@ -541,9 +616,11 @@ function Sheets() {
                                             </div>
                                         </div>
                                     </div>
-                                    <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleSubmit()}>
-                                        <span class="fa-solid fa-plus"></span>
-                                    </button>
+                                    <div className='container_btn_new-learner'>
+                                        <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleSubmit()}>
+                                            <span class="fa-solid fa-plus"></span>
+                                        </button>
+                                    </div>
                                 </fieldset>
                                 <fieldset className='containerField'>
                                     <div id='container_beltdegree'><div className='inline'><p>Faixa</p>
@@ -553,19 +630,29 @@ function Sheets() {
                                                     <label htmlFor={itBeltColor}>
                                                         <input type="radio" className='Radio' value={itBeltColor} checked={selectRadio === itBeltColor} onClick={() => setSelectRadio(itBeltColor)} />
                                                     </label>
-                                                    <div id={itBeltColor} className='color' onClick={() => setSelectRadio(itBeltColor)}></div>
+                                                    <div id={itBeltColor} className='selection-color color' onClick={() => setSelectRadio(itBeltColor)}></div>
                                                 </>
                                             ))}
                                         </div>
                                     </div>
                                         <div className='inline'><p>Grau</p>
                                             <select name="ndegree" id="idegree" value={degree} onChange={e => setDegree(e.target.value)} >
+                                                <option value="Selecione" selected>Selecione</option>
+                                                <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
-                                                <option value="5">5</option>
                                             </select>
+                                        <div className='inline'>
+                                            <p>Sensei</p>
+                                            <select className='sensei' value={senseiId} onChange={e => setSenseiId(e.target.value)} >
+                                                <option value="Selecione" selected>Selecione</option>
+                                                {senseis.map(itSensei => (
+                                                    <option value={itSensei.id}>{itSensei.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -574,9 +661,10 @@ function Sheets() {
                     </div>
                 )}
                 {editingModalId && (
+
                     <div className='backdrop_modal_close'>
                         <dialog id='dialog' open className='dialog_new-learner'>
-                            <input type="button" value="X" id='dialog_btn' onClick={closeModal} />
+                            <input type="button" value="X" id='dialog_btn' onClick={handleCloseEditingModal} />
                             <form id='data' style={{ width: '85%' }}>
                                 <fieldset className='containerField'>
                                     <legend>
@@ -587,18 +675,31 @@ function Sheets() {
                                         <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '98%' }} value={editingModalName} onChange={e => setEditingModalName(e.target.value)} />
                                     </div>
                                     <div id='phone_mail'>
-                                        <div className='line' style={{ width: '100%' }}><p>Telefone</p><input type="number" className='boxInput' placeholder='(     ) ___ ____________-____________ ' value={editingModalPhone} onChange={e => setEditingModalPhone(e.target.value)} /></div>
+                                        <div className='line' style={{ width: '100%' }}><p>Telefone</p><input type="number" className='boxInput' placeholder='(     ) ___ ____________-____________ ' value={+editingModalPhone} onChange={e => setEditingModalPhone(e.target.value)} /></div>
                                     </div>
 
                                     <div id='phone_mail'>
                                         <div id='container___phone-mail'>
 
-                                            <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
+                                            <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate ? editingModalPaymentDate.toISOString().split('T')[0] : ''} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                         </div>
                                     </div>
                                     <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleUpdateLearner()}>
                                         <span class="fa-solid fa-plus"></span>
                                     </button>
+                                    {openModalLoading && (
+                                        <div className='backdrop'>
+                                            <dialog className='modalLoading' open>
+                                                <div className='loader'>
+                                                    <FadeLoader
+                                                        color='#ffbb00'
+                                                        size={300}
+                                                        loading={true}
+                                                    />
+                                                </div>
+                                            </dialog>
+                                        </div>
+                                    )}
                                 </fieldset>
                                 <fieldset className='containerField'>
                                     <div id='container_beltdegree'><div className='inline'><p>Faixa</p>
@@ -608,19 +709,28 @@ function Sheets() {
                                                     <label htmlFor={itBeltColor}>
                                                         <input type="radio" className='Radio' value={itBeltColor} checked={editingModalBeltColor === itBeltColor} onClick={() => setEditingModalBeltColor(itBeltColor)} />
                                                     </label>
-                                                    <div id={itBeltColor} className='color' onClick={() => setEditingModalBeltColor(itBeltColor)}></div>
+                                                    <div id={itBeltColor} className='selection-color color' onClick={() => setEditingModalBeltColor(itBeltColor)}></div>
                                                 </>
                                             ))}
                                         </div>
                                     </div>
                                         <div className='inline'><p>Grau</p>
                                             <select name="ndegree" id="idegree" value={editingModalDegree} onChange={e => setEditingModalDegree(e.target.value)} >
+                                                <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
-                                                <option value="5">5</option>
                                             </select>
+                                        <div className='inline'>
+                                            <p>Sensei</p>
+                                            <select className='sensei' value={editingModalSenseiId} onChange={e => setEditingModalSenseiId(e.target.value)} >
+                                                <option value="Selecione" selected>Selecione</option>
+                                                {senseis.map(itSensei => (
+                                                    <option value={itSensei.id}>{itSensei.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -638,6 +748,7 @@ function Sheets() {
                                 <th className='table__tittle'>Telefone</th>
                                 <th className='table__tittle'>Faixa</th>
                                 <th className='table__tittle'>Grau</th>
+                                <th className='table__tittle'>Sensei</th>
                                 <th className='table__tittle'>Ultimo Pagamento</th>
                                 <th className='table__tittle'>Proximos Vencimentos</th>
                                 <th className='table__tittle'>Situação</th>
@@ -645,28 +756,58 @@ function Sheets() {
                             </tr>
                         </thead>
                         <tbody>
-                            {learners.filter(iterationLearner => {
-                                if (!onlyPendingLearners)
+                            {learners
+                            .filter(iterationLearner => {
+                                if (!onlyPendingLearners && !selectSensei)
                                     return true;
 
-                                const learnerExpiringDate = new Date(iterationLearner.expiringDate);
+                                if (onlyPendingLearners) {
+                                    const learnerExpiringDate = new Date(iterationLearner.expiringDate);
+    
+                                    const now = new Date();
+    
+                                    const isPending = isToday(learnerExpiringDate) || learnerExpiringDate < now;
 
-                                const now = new Date();
+                                    if (!isPending)
+                                        return false;
+                                }
 
-                                return isToday(learnerExpiringDate) || learnerExpiringDate < now;
-                            }).map(iterationLearner => (
+                                if (selectSensei) {
+                                    const isLearnerFromSelectedSensei = iterationLearner.senseiId === +selectSensei;
+                                    
+                                    if (!isLearnerFromSelectedSensei)
+                                        return false;
+                                }
+
+                                return true;
+                            })
+                            .map(iterationLearner => (
                                 <tr key={iterationLearner.id}>
-                                    <td className='back'>{iterationLearner.id}</td>
-                                    <td className='back'>{iterationLearner.name}</td>
-                                    <td className='back'>{iterationLearner.phone}</td>
-                                    <td id={iterationLearner.beltColor} style={{ scale: '0.4', borderRadius: '50px' }}></td>
-                                    <td className='back'>{iterationLearner.degree}</td>
+                                    <td>{iterationLearner.id}</td>
+                                    <td>{iterationLearner.name}</td>
+                                    <td>{iterationLearner.phone}</td>
+                                    <td style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}>
+                                        <div
+                                            id={iterationLearner.beltColor}
+                                            className='selection-color'
+                                            style={{
+                                                width: '60%',
+                                            }} 
+                                        />
+                                    </td>
+                                    <td>{iterationLearner.degree}</td>
+                                    <td>{renderSensei(iterationLearner.senseiId)}</td>
                                     <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
                                     <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
                                     <td>{renderSituation(iterationLearner.expiringDate)}</td>
-                                    <td> <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
-                                        <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }} onClick={openModal}></span></label></button>
-                                        <button className='button_dell_edit' onClick={() => handleRemove(iterationLearner.id)} ><label htmlFor="fa-regular fa-trash-can"><span className='fa-regular fa-trash-can' style={{ color: 'white', position: 'relative', top: '0px' }} ></span></label></button> </td>
+                                    <td>
+                                        <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
+                                        <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }}></span></label></button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -8,6 +8,8 @@ import Api from '../../services/Api'
 import { FadeLoader } from 'react-spinners';
 import './login.module.css'
 
+import { toast } from 'react-toastify';
+
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,7 +19,7 @@ function Login() {
 
     const handleLogin = () => {
         if (!email || !password) {
-            return window.alert('Dados nao informados!')
+            return toast.error('Informe os dados')
         }
         setOpenModalLoading(true);
 
@@ -54,7 +56,7 @@ function Login() {
                         <div id='logo_text'>
                             <img src={logo_selvagem} alt="logotype" id='logo' /> <h2>SELVAGEM JJT</h2>
                         </div>
-                        <h1 className='titleBox'>Sign in
+                        <h1 className='titleBox'>Login
                             <p>Acesse a interface de usuario digitando e-mail e senha abaixo.</p>
                         </h1>
                         <label htmlFor="name"><b>E-mail:</b></label>

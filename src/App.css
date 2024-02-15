@@ -58,11 +58,18 @@ h1 p {
 }
 
 .onlyPendingcheckbox {
-    margin: 15px;
+    position: relative;
+    right: 65px;
+}
+
+#container_pendinglearners{
+    display: flex;
+    padding-left: 0px;
 }
 
 .onlyPendingLearners {
     align-items: center;
+    margin-right: 70px;
 }
 
 #btn_confirm {
@@ -158,6 +165,7 @@ div .typeBox:hover {
 /* formatacao TABELAS */
 
 table {
+    background-color: transparent;
     font-size: 10pt;
 }
 
@@ -196,7 +204,7 @@ td .btn_tableBack {
 #btn_edit_learner {
     background-color: #ffbb00;
     padding: 5px;
-    width: 35%;
+    width: 20%;
     height: 40px;
     color: white;
     font-size: 12pt;
@@ -273,7 +281,7 @@ td span {
 }
 
 .btn_container {
-    width: 40%;
+    width: 55%;
     display: flex;
     margin: 10px auto;
     justify-content: end;
@@ -376,7 +384,7 @@ label:hover #link_exit {
     align-items: center;
     justify-content: center;
     margin: auto;
-    width: 60%;
+    width: 50%;
     height: auto;
     border: none;
 
@@ -406,7 +414,7 @@ label:hover #link_exit {
     right: 0px;
     border: none;
     opacity: 1;
-    background-color: #ffffff;
+    background-color: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -494,6 +502,13 @@ form p {
     font-size: 10pt;
 }
 
+.container_btn_new-learner{
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;   
+}
+
 .containerField {
     display: inline-block;
     vertical-align: middle;
@@ -516,7 +531,18 @@ form p {
 
 #idegree {
     width: 100%;
-    padding: 6px;
+    padding: 2px;
+    font-size: 9pt;
+    margin: auto;
+}
+
+#container_senseis{
+    margin:0 15px;
+}
+
+.sensei {
+    width: 100%;
+    padding: 2px;
     font-size: 9pt;
     margin: auto;
 }
@@ -535,7 +561,10 @@ div #white {
     height: 30px;
     border-radius: 20px;
     background-color: #ffffff;
-    border: 1px solid black;
+}
+
+.selection-color {
+    border: 1px solid black !important;
 }
 
 div #purple {
@@ -696,6 +725,36 @@ span#title_data {
 }
 
 @media screen and (max-width: 900px) {
+
+    .container_btn_new-learner{
+        width: 50%;
+        display: flex;
+        justify-content: space-around;
+        margin: auto;
+        position: relative;
+        top: 330px;
+        align-items: center;   
+    }
+
+    #container_pendinglearners{
+        display: flex;
+        padding-left: 0px;
+        margin-left: 100px;
+    }
+
+    .onlyPendingcheckbox {
+       margin-right: 0px;
+       position: relative;
+       right: 20px;
+    }
+    
+    .onlyPendingLearners {
+        position: relative;
+        left: 50px;
+        align-items: center;
+        font-size: 10pt;
+    }
+
     #btn_edit_learner {
         background-color: #ffbb00;
         padding: 5px;
@@ -740,11 +799,15 @@ span#title_data {
     }
 
     #container_beltdegree {
-        margin: 20px auto;
+        margin: auto;
+        position: relative;
+        bottom: 70px;
+        width: 100%;
+        scale: 0.9;
     }
 
     .btn_container {
-        width: 85%;
+        width: 100%;
         display: flex;
         margin: 50px auto;
         justify-content: end;
@@ -785,7 +848,7 @@ span#title_data {
 
 
     div.template {
-        margin-top: -230px;
+        margin-top: -200px;
     }
 
 
@@ -856,18 +919,6 @@ span#title_data {
         justify-content: space-around;
     }
 
-    #btn_edit_learner.button_new-learner {
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        position: absolute;
-        width: 40%;
-        height: 5%;
-        left: 110px;
-        bottom: -5px;
-        
-    }
-
 
     #btn_edit.btn_add {
         font-size: 10pt;
@@ -910,6 +961,7 @@ span#title_data {
     }
 
     #btn_exit {
+        
         border: none;
         float: right;
         display: flex;
