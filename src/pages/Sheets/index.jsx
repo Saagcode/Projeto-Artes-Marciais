@@ -34,6 +34,10 @@ function Sheets() {
 
     const beltColors = [
         'white',
+        'gray',
+        'yellow',
+        'orange',
+        'green',
         'blue',
         'purple',
         'brown',
@@ -243,7 +247,22 @@ function Sheets() {
         setModalOpen(true);
     };
 
+    const clearModaldata = () => {
+        setName(null);
+        setPhone(null);
+        setDegree(null);
+        setSelectRadio(null);
+        setSenseiId(null);
+        setIsFirstInvoicePaid(null);
+    }
+
     const closeModal = () => {
+        if (name || phone || selectRadio || degree || senseiId || isFirstInvoicePaid) {
+            if(window.confirm('Tem certeza que deseja sair sem salvar?')) {
+                clearModaldata();
+                setModalOpen(false);
+            }
+        }
         setModalOpen(false);
     };
 
@@ -633,8 +652,8 @@ function Sheets() {
                                                     <div id={itBeltColor} className='selection-color color' onClick={() => setSelectRadio(itBeltColor)}></div>
                                                 </>
                                             ))}
-                                        </div>
                                     </div>
+                                        </div>
                                         <div className='inline'><p>Grau</p>
                                             <select name="ndegree" id="idegree" value={degree} onChange={e => setDegree(e.target.value)} >
                                                 <option value="Selecione" selected>Selecione</option>

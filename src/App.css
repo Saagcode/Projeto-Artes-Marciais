@@ -591,9 +591,41 @@ div #blue {
     background-color: #0077ff;
 }
 
+div #gray {
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    background-color: #6a6b6d;
+}
+
+div #yellow {
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    background-color: #fffb00;
+}
+
+div #orange {
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    background-color: #ff7b00;
+}
+
+div #green {
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    background-color: #00ff2a;
+}
+
 div#colors .Radio {
     position: relative;
-    right: 20px;
+    right: 0px;
     top: 30px;
     display: flex;
     flex-direction: column;
@@ -602,7 +634,7 @@ div#colors .Radio {
 
 div#colors .color {
     transition: 1s;
-    margin: 0px;
+    margin-left: 20px;
     cursor: pointer;
 }
 
@@ -612,8 +644,12 @@ div#colors .color:hover {
 }
 
 #colors {
+    margin-bottom: -240px;
+    width: 95%;
+    overflow-y: scroll;
+    height: 78%;
     margin-left: 25px;
-    margin-top: -25px;
+    margin-top: -5px;
 }
 
 #container_beltdegree {
@@ -622,7 +658,7 @@ div#colors .color:hover {
     background-color: #9b9b9b18;
     box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.3);
     display: flex;
-    width: 70%;
+    width: 78%;
     margin-left: 90px;
     justify-content: space-around;
     opacity: 1;
@@ -1122,7 +1158,7 @@ span#title_data {
     }
 
     #colors {
-        margin-left: -20px;
+        margin-left: 0px;
         margin-top: 30px;
         display: inline-flex;
     }
