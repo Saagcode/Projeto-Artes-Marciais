@@ -62,7 +62,7 @@ h1 p {
     right: 65px;
 }
 
-#container_pendinglearners{
+#container_pendinglearners {
     display: flex;
     padding-left: 0px;
 }
@@ -216,17 +216,17 @@ td .btn_tableBack {
     opacity: 1;
     animation: slide2 1s linear forwards;
     transition: 0.5s;
+}
+
+@keyframes slide2 {
+    0% {
+        opacity: 0;
     }
 
-    @keyframes slide2 {
-        0% {
-            opacity: 0;
-        }
-
-        100% {
-            opacity: 1;
-        }
+    100% {
+        opacity: 1;
     }
+}
 
 
 #btn_edit_learner:hover {
@@ -502,11 +502,11 @@ form p {
     font-size: 10pt;
 }
 
-.container_btn_new-learner{
+.container_btn_new-learner {
     width: 100%;
     display: flex;
     justify-content: space-around;
-    align-items: center;   
+    align-items: center;
 }
 
 .containerField {
@@ -526,7 +526,6 @@ form p {
 .inline {
     display: inline;
     align-items: center;
-    padding-bottom: 15px;
 }
 
 #idegree {
@@ -536,8 +535,10 @@ form p {
     margin: auto;
 }
 
-#container_senseis{
-    margin:0 15px;
+#container_senseis {
+    margin: 0 15px;
+    width: 100%;
+    font-size: 13px;
 }
 
 .sensei {
@@ -676,17 +677,20 @@ div#colors .color:hover {
 }
 
 #phone_mail {
-    width: 98%;
+    width: 100%;
     justify-content: space-between;
     display: flex;
 }
 
 select#paymentdone {
-    margin: 3px 10px;
-    font-size: 10pt;
+    margin: 3px 0px;
+    font-size: 9pt;
+    padding: 2px;
+    width: 100%;
 }
 
 .line {
+    margin: 0 5px;
     width: 100%;
     display: inline;
 }
@@ -707,7 +711,7 @@ select {
     bottom: 20px;
 }
 
-#buttons_save_back{
+#buttons_save_back {
     margin: 30px 0 0 0;
     width: 100%;
     display: flex;
@@ -762,31 +766,41 @@ span#title_data {
 
 @media screen and (max-width: 900px) {
 
-    .container_btn_new-learner{
+
+    #container_senseis {
+        margin: 0 15px;
+        position: relative;
+        left: 270px;
+        bottom: 25px;
+    }
+
+    .container_btn_new-learner {
         width: 50%;
         display: flex;
         justify-content: space-around;
         margin: auto;
         position: relative;
         top: 330px;
-        align-items: center;   
+        align-items: center;
     }
 
-    #container_pendinglearners{
+    #container_pendinglearners {
         display: flex;
         padding-left: 0px;
         margin-left: 100px;
     }
-
+    
     .onlyPendingcheckbox {
-       margin-right: 0px;
-       position: relative;
-       right: 20px;
+        margin-right: 0px;
+        position: relative;
+        right: 60px;
+        top: 40px;
     }
     
     .onlyPendingLearners {
         position: relative;
-        left: 50px;
+        top: 30px;
+        left: 10px;
         align-items: center;
         font-size: 10pt;
     }
@@ -806,6 +820,7 @@ span#title_data {
         opacity: 1;
         animation: slide2 1s linear forwards;
     }
+
     .template caption {
         position: relative;
         left: 230px;
@@ -870,8 +885,19 @@ span#title_data {
     }
 
     select#paymentdone {
-        margin: 3px 6px;
-        font-size: 10pt;
+        margin: 0px 0px 0px 5px;
+        font-size: 9pt;
+        padding: 2px;
+        width: 100%;
+    }
+
+    select#idegree {
+        margin: 0px 0px 0px 5px;
+    }
+
+    select.sensei {
+        margin: 0px 0px 0px 5px;
+        width: 100%;
     }
 
     .table {
@@ -907,7 +933,7 @@ span#title_data {
         transition: 1s;
     }
 
-    #buttons_save_back{
+    #buttons_save_back {
         width: 100%;
         margin: 30px 0 0 0;
         display: flex;
@@ -997,7 +1023,7 @@ span#title_data {
     }
 
     #btn_exit {
-        
+
         border: none;
         float: right;
         display: flex;
@@ -1100,12 +1126,13 @@ span#title_data {
 
     span#title_data_text {
         font-size: 12pt;
-        margin: 40px;font-size: 12pt;
+        margin: 40px;
+        font-size: 12pt;
         padding-left: 20px;
         animation: borderleft 2s linear forwards;
     }
 
-    #container_name{
+    #container_name {
         width: 100%;
         padding: 20px;
         margin: 0px 20px;

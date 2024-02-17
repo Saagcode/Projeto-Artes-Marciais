@@ -47,6 +47,7 @@ function Sheets() {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [paymentDate, setPaymentDate] = useState();
+    const [priceMonthlyFees, setPriceMonthlyFees] = useState('');
     const [degree, setDegree] = useState('');
     const [senseiId, setSenseiId] = useState('');
     const [isFirstInvoicePaid, setIsFirstInvoicePaid] = useState('');
@@ -60,10 +61,10 @@ function Sheets() {
     }, []);
 
     const handleSubmit = () => {
-        if (!name || !phone || !paymentDate || !selectRadio || !degree || !senseiId || !isFirstInvoicePaid) {
+        if (!name || !phone || !paymentDate || !priceMonthlyFees || !selectRadio || !degree || !senseiId || !isFirstInvoicePaid) {
             return toast.error('Informe todos os parâmetros')
         } else {
-            closeModal(true)
+            setModalOpen(false); 
         }
 
         // :00:00.000Z
@@ -75,6 +76,7 @@ function Sheets() {
             name: name,
             phone: phone,
             paymentDate: timezoneFixedDate,
+            priceMonthlyFees: +priceMonthlyFees,
             beltColor: selectRadio,
             degree: +degree,
             isFirstInvoicePaid: isFirstInvoicePaid === 'true',
@@ -170,7 +172,6 @@ function Sheets() {
     const closeModalFatura = () => {
         setInvoices([]);
         setSelectedLearner();
-
         setModalOpenFatura(false);
     };
 
@@ -180,6 +181,7 @@ function Sheets() {
     const [editingModalName, setEditingModalName] = useState('');
     const [editingModalPhone, setEditingModalPhone] = useState();
     const [editingModalPaymentDate, setEditingModalPaymentDate] = useState();
+    const [editingModalPriceMonthlyFees, setEditingModalPriceMonthlyFees] = useState('');
     const [editingModalBeltColor, setEditingModalBeltColor] = useState('');
     const [editingModalDegree, setEditingModalDegree] = useState('');
     const [editingModalSenseiId, setEditingModalSenseiId] = useState('');
@@ -189,6 +191,7 @@ function Sheets() {
         setEditingModalName(editingLearner.name)
         setEditingModalPhone(editingLearner.phone)
         setEditingModalPaymentDate(new Date(editingLearner.expiringDate))
+        setEditingModalPriceMonthlyFees(editingLearner.priceMonthlyFees)
         setEditingModalBeltColor(editingLearner.beltColor)
         setEditingModalDegree(editingLearner.degree)
         setEditingModalSenseiId(editingLearner.senseiId)
@@ -204,6 +207,7 @@ function Sheets() {
             !editingModalName ||
             !editingModalPhone ||
             !editingModalPaymentDate ||
+            !editingModalPriceMonthlyFees ||
             !editingModalBeltColor ||
             !editingModalDegree ||
             !editingModalSenseiId
@@ -221,6 +225,7 @@ function Sheets() {
                 phone: editingModalPhone,
                 beltColor: editingModalBeltColor,
                 degree: +editingModalDegree,
+                priceMonthlyFees: +editingModalPriceMonthlyFees,
                 subscriptionPrice: 135,
                 expiringDate: timezoneFixedDate,
                 senseiId: +editingModalSenseiId
@@ -252,13 +257,14 @@ function Sheets() {
         setPhone(null);
         setDegree(null);
         setSelectRadio(null);
+        setPriceMonthlyFees(null);
         setSenseiId(null);
         setIsFirstInvoicePaid(null);
     }
 
     const closeModal = () => {
-        if (name || phone || selectRadio || degree || senseiId || isFirstInvoicePaid) {
-            if(window.confirm('Tem certeza que deseja sair sem salvar?')) {
+        if (name || phone || selectRadio || degree || senseiId || isFirstInvoicePaid || priceMonthlyFees) {
+            if (window.confirm('Tem certeza que deseja sair sem salvar?')) {
                 clearModaldata();
                 setModalOpen(false);
             }
@@ -414,13 +420,13 @@ function Sheets() {
 
     //     testArray.forEach(iteration => {
     //         const multiplication = iteration * 2;
-            
+
     //         console.log(multiplication)
     //     })
 
     //     const filteredArray = testArray.filter(iteration => {
     //         const isEven = iteration % 2 === 0;
-            
+
     //         return isEven
     //     })
 
@@ -436,13 +442,13 @@ function Sheets() {
 
             <div className='btn_container'>
                 <div id='container_senseis'>
-                        <span>Sensei: </span>
-                        <select className='sensei' onChange={(e) => setSelectSensei(e.target.value)}>
-                            <option value="">Selecione</option>
-                            {senseis.map(itSensei => (
-                                <option value={itSensei.id}>{itSensei.name}</option>
-                            ))}
-                        </select>
+                    <span>Sensei: </span>
+                    <select className='sensei_init' onChange={(e) => setSelectSensei(e.target.value)}>
+                        <option value="">Selecione</option>
+                        {senseis.map(itSensei => (
+                            <option value={itSensei.id}>{itSensei.name}</option>
+                        ))}
+                    </select>
                 </div>
                 <div id='container_pendinglearners'>
                     <span className='onlyPendingLearners'> pagamentos pendentes:</span>
@@ -623,16 +629,11 @@ function Sheets() {
 
                                     <div id='phone_mail'>
                                         <div id='container___phone-mail'>
-
-                                            <div className='line'><p>Data do pagamento</p><input value={paymentDate} onChange={e => setPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                             <div className='line'>
-                                                <p style={{ fontSize: '8pt' }}>Pagamento efetuado?</p>
-                                                <select id="paymentdone" value={isFirstInvoicePaid} onChange={e => setIsFirstInvoicePaid(e.target.value)} style={{ width: '95%' }}>
-                                                    <option value=''>Selecione</option>
-                                                    <option value="true">Sim</option>
-                                                    <option value="false">Nao</option>
-                                                </select>
+                                                <p>Valor</p>
+                                                <input className='boxInput' type="number" value={+priceMonthlyFees} onChange={e => setPriceMonthlyFees(e.target.value)} placeholder='R$' />
                                             </div>
+                                            <div className='line'><p>Data do pagamento</p><input value={paymentDate} onChange={e => setPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                         </div>
                                     </div>
                                     <div className='container_btn_new-learner'>
@@ -652,8 +653,8 @@ function Sheets() {
                                                     <div id={itBeltColor} className='selection-color color' onClick={() => setSelectRadio(itBeltColor)}></div>
                                                 </>
                                             ))}
-                                    </div>
                                         </div>
+                                    </div>
                                         <div className='inline'><p>Grau</p>
                                             <select name="ndegree" id="idegree" value={degree} onChange={e => setDegree(e.target.value)} >
                                                 <option value="Selecione" selected>Selecione</option>
@@ -663,15 +664,23 @@ function Sheets() {
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
                                             </select>
-                                        <div className='inline'>
-                                            <p>Sensei</p>
-                                            <select className='sensei' value={senseiId} onChange={e => setSenseiId(e.target.value)} >
-                                                <option value="Selecione" selected>Selecione</option>
-                                                {senseis.map(itSensei => (
-                                                    <option value={itSensei.id}>{itSensei.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                            <div className='inline'>
+                                                <p>Sensei</p>
+                                                <select className='sensei' value={senseiId} onChange={e => setSenseiId(e.target.value)} >
+                                                    <option value="Selecione" selected>Selecione</option>
+                                                    {senseis.map(itSensei => (
+                                                        <option value={itSensei.id}>{itSensei.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className='inline'>
+                                                <p style={{ fontSize: '8pt' }}>Pagamento efetuado?</p>
+                                                <select id="paymentdone" value={isFirstInvoicePaid} onChange={e => setIsFirstInvoicePaid(e.target.value)}>
+                                                    <option value=''>Selecione</option>
+                                                    <option value="true">Sim</option>
+                                                    <option value="false">Nao</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -699,7 +708,10 @@ function Sheets() {
 
                                     <div id='phone_mail'>
                                         <div id='container___phone-mail'>
-
+                                            <div className='line'>
+                                                <p>Valor</p>
+                                                <input className='boxInput' type="number" value={+editingModalPriceMonthlyFees} onChange={e =>  setEditingModalPriceMonthlyFees(e.target.value)} />
+                                            </div>
                                             <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate ? editingModalPaymentDate.toISOString().split('T')[0] : ''} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                         </div>
                                     </div>
@@ -741,15 +753,15 @@ function Sheets() {
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
                                             </select>
-                                        <div className='inline'>
-                                            <p>Sensei</p>
-                                            <select className='sensei' value={editingModalSenseiId} onChange={e => setEditingModalSenseiId(e.target.value)} >
-                                                <option value="Selecione" selected>Selecione</option>
-                                                {senseis.map(itSensei => (
-                                                    <option value={itSensei.id}>{itSensei.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                            <div className='inline'>
+                                                <p>Sensei</p>
+                                                <select className='sensei' value={editingModalSenseiId} onChange={e => setEditingModalSenseiId(e.target.value)} >
+                                                    <option value="Selecione" selected>Selecione</option>
+                                                    {senseis.map(itSensei => (
+                                                        <option value={itSensei.id}>{itSensei.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -776,59 +788,59 @@ function Sheets() {
                         </thead>
                         <tbody>
                             {learners
-                            .filter(iterationLearner => {
-                                if (!onlyPendingLearners && !selectSensei)
+                                .filter(iterationLearner => {
+                                    if (!onlyPendingLearners && !selectSensei)
+                                        return true;
+
+                                    if (onlyPendingLearners) {
+                                        const learnerExpiringDate = new Date(iterationLearner.expiringDate);
+
+                                        const now = new Date();
+
+                                        const isPending = isToday(learnerExpiringDate) || learnerExpiringDate < now;
+
+                                        if (!isPending)
+                                            return false;
+                                    }
+
+                                    if (selectSensei) {
+                                        const isLearnerFromSelectedSensei = iterationLearner.senseiId === +selectSensei;
+
+                                        if (!isLearnerFromSelectedSensei)
+                                            return false;
+                                    }
+
                                     return true;
-
-                                if (onlyPendingLearners) {
-                                    const learnerExpiringDate = new Date(iterationLearner.expiringDate);
-    
-                                    const now = new Date();
-    
-                                    const isPending = isToday(learnerExpiringDate) || learnerExpiringDate < now;
-
-                                    if (!isPending)
-                                        return false;
-                                }
-
-                                if (selectSensei) {
-                                    const isLearnerFromSelectedSensei = iterationLearner.senseiId === +selectSensei;
-                                    
-                                    if (!isLearnerFromSelectedSensei)
-                                        return false;
-                                }
-
-                                return true;
-                            })
-                            .map(iterationLearner => (
-                                <tr key={iterationLearner.id}>
-                                    <td>{iterationLearner.id}</td>
-                                    <td>{iterationLearner.name}</td>
-                                    <td>{iterationLearner.phone}</td>
-                                    <td style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}>
-                                        <div
-                                            id={iterationLearner.beltColor}
-                                            className='selection-color'
-                                            style={{
-                                                width: '60%',
-                                            }} 
-                                        />
-                                    </td>
-                                    <td>{iterationLearner.degree}</td>
-                                    <td>{renderSensei(iterationLearner.senseiId)}</td>
-                                    <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
-                                    <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
-                                    <td>{renderSituation(iterationLearner.expiringDate)}</td>
-                                    <td>
-                                        <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
-                                        <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }}></span></label></button>
-                                    </td>
-                                </tr>
-                            ))}
+                                })
+                                .map(iterationLearner => (
+                                    <tr key={iterationLearner.id}>
+                                        <td>{iterationLearner.id}</td>
+                                        <td>{iterationLearner.name}</td>
+                                        <td>{iterationLearner.phone}</td>
+                                        <td style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}>
+                                            <div
+                                                id={iterationLearner.beltColor}
+                                                className='selection-color'
+                                                style={{
+                                                    width: '60%',
+                                                }}
+                                            />
+                                        </td>
+                                        <td>{iterationLearner.degree}</td>
+                                        <td>{renderSensei(iterationLearner.senseiId)}</td>
+                                        <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
+                                        <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
+                                        <td>{renderSituation(iterationLearner.expiringDate)}</td>
+                                        <td>
+                                            <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
+                                            <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }}></span></label></button>
+                                        </td>
+                                    </tr>
+                                ))}
                         </tbody>
                     </Table>
                 </div>
