@@ -15,7 +15,7 @@ import ErrorService from '../../services/ErrorService';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 
-import CurrencyInput from 'react-currency-input'
+import CurrencyInput from 'react-currency-input-field';
 
 import { mask, unMask } from 'remask';
 
@@ -645,8 +645,21 @@ function Sheets() {
                                             <div className='line'>
                                                 <p>Valor</p>
                                                 <CurrencyInput
+                                                    id="input-example"
                                                     className='currency-input boxInput'
+                                                    groupSeparator='.'
+                                                    decimalSeparator=','
+                                                    defaultValue={priceMonthlyFees}
+                                                    name="input-name"
                                                     prefix='R$ '
+                                                    placeholder='R$ '
+                                                    decimalsLimit={2}
+                                                    onValueChange={(value, name, values) => {setPriceMonthlyFees(values.float)}}
+                                                />
+                                                {/* <CurrencyInput
+                                                    
+                                                    prefix='R$ '
+                                                    groupSeparator='-'
                                                     decimalSeparator=','
                                                     thousandSeparator='.'
                                                     value={priceMonthlyFees}
@@ -655,7 +668,7 @@ function Sheets() {
                                                     maskedValue,
                                                     floatValue
                                                     ) => setPriceMonthlyFees(floatValue)}
-                                                />
+                                                /> */}
                                             </div>
                                             <div className='line'><p>Data do pagamento</p><input value={paymentDate} onChange={e => setPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                         </div>
@@ -744,16 +757,16 @@ function Sheets() {
                                             <div className='line'>
                                                 <p>Valor</p>
                                                 <CurrencyInput
+                                                    id="input-example"
                                                     className='currency-input boxInput'
-                                                    prefix='R$ '
+                                                    groupSeparator='.'
                                                     decimalSeparator=','
-                                                    thousandSeparator='.'
-                                                    value={editingModalPriceMonthlyFees}
-                                                    onChangeEvent={(
-                                                    e,
-                                                    maskedValue,
-                                                    floatValue
-                                                    ) => setEditingModalPriceMonthlyFees(floatValue)}
+                                                    defaultValue={editingModalPriceMonthlyFees}
+                                                    name="input-name"
+                                                    prefix='R$ '
+                                                    placeholder='R$ '
+                                                    decimalsLimit={2}
+                                                    onValueChange={(value, name, values) => {setEditingModalPriceMonthlyFees(values.float)}}
                                                 />
                                             </div>
                                             <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate ? editingModalPaymentDate.toISOString().split('T')[0] : ''} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
