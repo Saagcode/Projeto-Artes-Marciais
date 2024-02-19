@@ -65,7 +65,7 @@ function Sheets() {
     }, []);
 
     const handleSubmit = () => {
-        if (!name || !phone || !paymentDate || !priceMonthlyFees || !selectRadio || !degree || !senseiId || !isFirstInvoicePaid) {
+        if (!name || !phone || !paymentDate || !priceMonthlyFees || !selectRadio || (!editingModalDegree && editingModalDegree !== 0) || !senseiId || !isFirstInvoicePaid) {
             return toast.error('Informe todos os parâmetros')
         } else {
             setModalOpen(false); 
@@ -78,7 +78,7 @@ function Sheets() {
 
         const requestBody = {
             name: name,
-            phone: phone,
+            phone: unMask(phone),
             paymentDate: timezoneFixedDate,
             beltColor: selectRadio,
             degree: +degree,
@@ -99,7 +99,7 @@ function Sheets() {
 
             setLearners(updatedLearnersArray)
 
-            clearModaldata
+            clearModaldata();
         }).catch(error => {
         })
     }
@@ -194,7 +194,7 @@ function Sheets() {
     const handleOpenEditingModal = editingLearner => {
         setEditingModalId(editingLearner.id)
         setEditingModalName(editingLearner.name)
-        setEditingModalPhone(editingLearner.phone)
+        setEditingModalPhone(mask(unMask(editingLearner.phone), ['(99) 9999-9999', '(99) 99999-9999']))
         setEditingModalPaymentDate(new Date(editingLearner.expiringDate))
         setEditingModalPriceMonthlyFees(editingLearner.subscriptionPrice)
         setEditingModalBeltColor(editingLearner.beltColor)
@@ -214,7 +214,7 @@ function Sheets() {
             !editingModalPaymentDate ||
             !editingModalPriceMonthlyFees ||
             !editingModalBeltColor ||
-            !editingModalDegree ||
+            (!editingModalDegree && editingModalDegree !== 0) ||
             !editingModalSenseiId
         )
             return toast.error('Preencha todas as informações')
@@ -737,16 +737,16 @@ function Sheets() {
                                     </legend>
                                     <div>
                                         <p>Nome</p>
-                                        <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '98%' }} value={editingModalName} onChange={e => setEditingModalName(e.target.value)} />
+                                        <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '99%' }} value={editingModalName} onChange={e => setEditingModalName(e.target.value)} />
                                     </div>
                                     <div id='phone_mail'>
                                         <div className='line' style={{ width: '100%' }}>
                                             <p>Telefone</p>
                                             <input
-                                            type="number"
+                                            type="text"
                                             className='boxInput'
                                             placeholder='(     ) ___ ____________-____________ '
-                                            value={+editingModalPhone}
+                                            value={editingModalPhone}
                                             onChange={(e) => setEditingModalPhone(mask(unMask(e.target.value), ['(99) 9999-9999', '(99) 99999-9999']))}
                                         />
                                         </div>
@@ -769,7 +769,15 @@ function Sheets() {
                                                     onValueChange={(value, name, values) => {setEditingModalPriceMonthlyFees(values.float)}}
                                                 />
                                             </div>
-                                            <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate ? editingModalPaymentDate.toISOString().split('T')[0] : ''} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
+                                            <div className='line'>
+                                                <p>Data do pagamento</p>
+                                                <input
+                                                    value={editingModalPaymentDate ? typeof editingModalPaymentDate === 'string' ? editingModalPaymentDate : editingModalPaymentDate.toISOString().split('T')[0] : ''}
+                                                    onChange={e => setEditingModalPaymentDate(e.target.value)}
+                                                    type="date"
+                                                    className='boxInput'
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                     <button type='button' id='btn_edit_learner' className='button_new-learner' onClick={() => handleUpdateLearner()}>
@@ -837,6 +845,7 @@ function Sheets() {
                                 <th className='table__tittle'>Faixa</th>
                                 <th className='table__tittle'>Grau</th>
                                 <th className='table__tittle'>Sensei</th>
+                                <th className='table__tittle'>Mensalidade</th>
                                 <th className='table__tittle'>Ultimo Pagamento</th>
                                 <th className='table__tittle'>Proximos Vencimentos</th>
                                 <th className='table__tittle'>Situação</th>
@@ -873,7 +882,7 @@ function Sheets() {
                                     <tr key={iterationLearner.id}>
                                         <td>{iterationLearner.id}</td>
                                         <td>{iterationLearner.name}</td>
-                                        <td>{iterationLearner.phone}</td>
+                                        <td>{mask(iterationLearner.phone, ['(99) 9999-9999', '(99) 99999-9999'])}</td>
                                         <td style={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -889,6 +898,7 @@ function Sheets() {
                                         </td>
                                         <td>{iterationLearner.degree}</td>
                                         <td>{renderSensei(iterationLearner.senseiId)}</td>
+                                        <td>{FormatCurrency(iterationLearner.subscriptionPrice)}</td>
                                         <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
                                         <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
                                         <td>{renderSituation(iterationLearner.expiringDate)}</td>
