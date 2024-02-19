@@ -15,6 +15,10 @@ import ErrorService from '../../services/ErrorService';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 
+import CurrencyInput from 'react-currency-input'
+
+import { mask, unMask } from 'remask';
+
 function Sheets() {
     const handleLogout = () => {
         localStorage.clear()
@@ -76,11 +80,10 @@ function Sheets() {
             name: name,
             phone: phone,
             paymentDate: timezoneFixedDate,
-            priceMonthlyFees: +priceMonthlyFees,
             beltColor: selectRadio,
             degree: +degree,
             isFirstInvoicePaid: isFirstInvoicePaid === 'true',
-            subscriptionPrice: 135,
+            subscriptionPrice: +priceMonthlyFees,
             senseiId: +senseiId
         }
 
@@ -95,6 +98,8 @@ function Sheets() {
             ]
 
             setLearners(updatedLearnersArray)
+
+            clearModaldata
         }).catch(error => {
         })
     }
@@ -191,7 +196,7 @@ function Sheets() {
         setEditingModalName(editingLearner.name)
         setEditingModalPhone(editingLearner.phone)
         setEditingModalPaymentDate(new Date(editingLearner.expiringDate))
-        setEditingModalPriceMonthlyFees(editingLearner.priceMonthlyFees)
+        setEditingModalPriceMonthlyFees(editingLearner.subscriptionPrice)
         setEditingModalBeltColor(editingLearner.beltColor)
         setEditingModalDegree(editingLearner.degree)
         setEditingModalSenseiId(editingLearner.senseiId)
@@ -225,8 +230,7 @@ function Sheets() {
                 phone: editingModalPhone,
                 beltColor: editingModalBeltColor,
                 degree: +editingModalDegree,
-                priceMonthlyFees: +editingModalPriceMonthlyFees,
-                subscriptionPrice: 135,
+                subscriptionPrice: +editingModalPriceMonthlyFees,
                 expiringDate: timezoneFixedDate,
                 senseiId: +editingModalSenseiId
             }
@@ -253,13 +257,13 @@ function Sheets() {
     };
 
     const clearModaldata = () => {
-        setName(null);
-        setPhone(null);
-        setDegree(null);
+        setName('');
+        setPhone('');
+        setDegree('');
         setSelectRadio(null);
-        setPriceMonthlyFees(null);
-        setSenseiId(null);
-        setIsFirstInvoicePaid(null);
+        setPriceMonthlyFees('');
+        setSenseiId('');
+        setIsFirstInvoicePaid('');
     }
 
     const closeModal = () => {
@@ -621,17 +625,37 @@ function Sheets() {
                                     </legend>
                                     <div>
                                         <p>Nome</p>
-                                        <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '98%' }} value={name} onChange={e => setName(e.target.value)} />
+                                        <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '99%' }} value={name} onChange={e => setName(e.target.value)} />
                                     </div>
                                     <div id='phone_mail'>
-                                        <div className='line' style={{ width: '100%' }}><p>Telefone</p><input type="number" className='boxInput' placeholder='(     ) ___ ____________-____________ ' value={phone} onChange={e => setPhone(e.target.value)} /></div>
+                                        <div className='line' style={{ width: '100%' }}>
+                                            <p>Telefone</p>
+                                            <input
+                                                type="text"
+                                                className='boxInput'
+                                                placeholder='(     ) ___ ____________-____________ '
+                                                value={phone}
+                                                onChange={(e) => setPhone(mask(unMask(e.target.value), ['(99) 9999-9999', '(99) 99999-9999']))}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div id='phone_mail'>
                                         <div id='container___phone-mail'>
                                             <div className='line'>
                                                 <p>Valor</p>
-                                                <input className='boxInput' type="number" value={+priceMonthlyFees} onChange={e => setPriceMonthlyFees(e.target.value)} placeholder='R$' />
+                                                <CurrencyInput
+                                                    className='currency-input boxInput'
+                                                    prefix='R$ '
+                                                    decimalSeparator=','
+                                                    thousandSeparator='.'
+                                                    value={priceMonthlyFees}
+                                                    onChangeEvent={(
+                                                    e,
+                                                    maskedValue,
+                                                    floatValue
+                                                    ) => setPriceMonthlyFees(floatValue)}
+                                                />
                                             </div>
                                             <div className='line'><p>Data do pagamento</p><input value={paymentDate} onChange={e => setPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                         </div>
@@ -703,14 +727,34 @@ function Sheets() {
                                         <input type="text" className='boxInput' placeholder='Nome completo' style={{ width: '98%' }} value={editingModalName} onChange={e => setEditingModalName(e.target.value)} />
                                     </div>
                                     <div id='phone_mail'>
-                                        <div className='line' style={{ width: '100%' }}><p>Telefone</p><input type="number" className='boxInput' placeholder='(     ) ___ ____________-____________ ' value={+editingModalPhone} onChange={e => setEditingModalPhone(e.target.value)} /></div>
+                                        <div className='line' style={{ width: '100%' }}>
+                                            <p>Telefone</p>
+                                            <input
+                                            type="number"
+                                            className='boxInput'
+                                            placeholder='(     ) ___ ____________-____________ '
+                                            value={+editingModalPhone}
+                                            onChange={(e) => setEditingModalPhone(mask(unMask(e.target.value), ['(99) 9999-9999', '(99) 99999-9999']))}
+                                        />
+                                        </div>
                                     </div>
 
                                     <div id='phone_mail'>
                                         <div id='container___phone-mail'>
                                             <div className='line'>
                                                 <p>Valor</p>
-                                                <input className='boxInput' type="number" value={+editingModalPriceMonthlyFees} onChange={e =>  setEditingModalPriceMonthlyFees(e.target.value)} />
+                                                <CurrencyInput
+                                                    className='currency-input boxInput'
+                                                    prefix='R$ '
+                                                    decimalSeparator=','
+                                                    thousandSeparator='.'
+                                                    value={editingModalPriceMonthlyFees}
+                                                    onChangeEvent={(
+                                                    e,
+                                                    maskedValue,
+                                                    floatValue
+                                                    ) => setEditingModalPriceMonthlyFees(floatValue)}
+                                                />
                                             </div>
                                             <div className='line'><p>Data do pagamento</p><input value={editingModalPaymentDate ? editingModalPaymentDate.toISOString().split('T')[0] : ''} onChange={e => setEditingModalPaymentDate(e.target.value)} type="date" className='boxInput' /></div>
                                         </div>

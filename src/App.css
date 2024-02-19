@@ -60,6 +60,7 @@ h1 p {
 .onlyPendingcheckbox {
     position: relative;
     right: 65px;
+    top: 11px;
 }
 
 #container_pendinglearners {
@@ -524,6 +525,7 @@ form p {
 }
 
 .inline {
+    margin: 15px;
     display: inline;
     align-items: center;
 }
@@ -757,7 +759,6 @@ span#title_data {
     display: flex;
     align-items: flex-start;
     justify-content: space-around;
-    height: 40%;
     width: 99%;
     margin: 22px 0px;
     left: 0px;
