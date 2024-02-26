@@ -65,7 +65,7 @@ function Sheets() {
     }, []);
 
     const handleSubmit = () => {
-        if (!name || !phone || !paymentDate || !priceMonthlyFees || !selectRadio || (!editingModalDegree && editingModalDegree !== 0) || !senseiId || !isFirstInvoicePaid) {
+        if (!name || !phone || !paymentDate || !priceMonthlyFees || !selectRadio || (!degree && degree !== 0) || !senseiId || !isFirstInvoicePaid) {
             return toast.error('Informe todos os parâmetros')
         } else {
             setModalOpen(false); 
