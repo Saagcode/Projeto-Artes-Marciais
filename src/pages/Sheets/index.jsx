@@ -864,7 +864,7 @@ function Sheets() {
                         <div className='container-tittle'>
                             <span className='tittle'>{compliment}, {nameUser}!</span>
                         </div>
-                        <input type="button" value="+Novo Aluno" id='btn_edit_learner' onClick={openModal} />
+                        <input type="button" value="+Novo Aluno" id='btn_edit_learner-1' onClick={openModal} />
                         <label htmlFor="btn_exit">
                             <button id='btn_exit' onClick={() => handleLogout()}>
                                 <img src={logout} alt="btn_exit" className='button_power' />

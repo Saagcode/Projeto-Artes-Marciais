@@ -807,6 +807,25 @@ span#title_data {
     bottom: 0px;
 }
 
+#btn_edit_learner-1 {
+    background-color: #ffbb00;
+    padding: 5px;
+    width: 20%;
+    height: 40px;
+    color: white;
+    position: relative;
+    right: 0px;
+    bottom: 0px;
+    font-size: 12pt;
+    border-left: 1px var(--white) solid;
+    border-right: 1px var(--white) solid;
+    border-bottom: none;
+    border-top: none;
+    border-radius: 20px;
+    opacity: 1;
+    animation: slide2 1s linear forwards;
+}
+
 @media screen and (max-width: 900px) {
     .text-pendentpay {
         margin: 0 10px;
@@ -888,6 +907,24 @@ span#title_data {
         right: 0px;
         bottom: 0px;
         top: 350px;
+        font-size: 12pt;
+        border-left: 1px var(--white) solid;
+        border-right: 1px var(--white) solid;
+        border-bottom: none;
+        border-top: none;
+        border-radius: 20px;
+        opacity: 1;
+        animation: slide2 1s linear forwards;
+    }
+    #btn_edit_learner-1 {
+        background-color: #ffbb00;
+        padding: 5px;
+        width: 20%;
+        height: 40px;
+        color: white;
+        position: relative;
+        right: 0px;
+        bottom: 0px;
         font-size: 12pt;
         border-left: 1px var(--white) solid;
         border-right: 1px var(--white) solid;
