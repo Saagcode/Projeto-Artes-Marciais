@@ -32,7 +32,7 @@ function Login() {
             .then(response => {
                 const authorizationKey = response.data.authorizationKey;
                 localStorage.setItem('sessionKey', authorizationKey);
-
+                localStorage.setItem('userEmail', email);
                 navigate('/tabelas');
             })
             .catch(error => {

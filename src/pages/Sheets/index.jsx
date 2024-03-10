@@ -11,15 +11,58 @@ import Api from '../../services/Api';
 import { FormatDate, FormatCurrency, TranslateStatus } from '../../services/UtilityServices';
 import { FadeLoader } from 'react-spinners';
 import ErrorService from '../../services/ErrorService';
-
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
-
 import CurrencyInput from 'react-currency-input-field';
-
 import { mask, unMask } from 'remask';
+import { jwtDecode } from 'jwt-decode';
+import Aos from 'aos'
+import 'aos/dist/aos.css'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+
+const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 function Sheets() {
+    const [search, setSearch] = useState('');
+
+    Aos.init();
+
+    let compliment = '';
+    const timesNow = new Date();
+    let hourNow = timesNow.getHours();
+    if (hourNow >= 6 && hourNow < 12) {
+        compliment = 'Bom dia';
+    } else if (hourNow >= 12 && hourNow < 18) {
+        compliment = 'Boa tarde';
+    } else {
+        compliment = 'Boa noite';
+    }
+
+
+    if (hourNow > 12 && compliment === 'Boa tarde' && hourNow < 24) {
+        compliment = 'Boa tarde';
+        hourNow = hourNow - 12;
+    }
+
+
+    const userEmail = localStorage.getItem('userEmail');
+    let nameUser = ''
+    if (userEmail === 'academia.selvagemjjt@gmail.com') {
+        nameUser = 'Luciano'
+    } else {
+        nameUser = 'Jhones'
+    }
+
+    // const [userMail, setUserMail] = useState('');
+    // useEffect(() => {
+    //     const token = localStorage.getItem('sessionKey')
+    //     const decodedToken = (jwtDecode(token));
+    //     if (decodedToken && typeof decodedToken === 'object' && decodedToken.hasOwnProperty('name')) {
+    //         setUserMail(decodedToken.name)
+    //     }
+    // }, []);
+
     const handleLogout = () => {
         localStorage.clear()
         navigate('/');
@@ -68,7 +111,7 @@ function Sheets() {
         if (!name || !phone || !paymentDate || !priceMonthlyFees || !selectRadio || (!degree && degree !== 0) || !senseiId || !isFirstInvoicePaid) {
             return toast.error('Informe todos os parâmetros')
         } else {
-            setModalOpen(false); 
+            setModalOpen(false);
         }
 
         // :00:00.000Z
@@ -441,178 +484,160 @@ function Sheets() {
     //     test();
     // }, [])
 
+    const [post, setPost] = useState({});
+    const [isLoad, setIsLoad] = useState(true);
+
+    useEffect(() => {
+        setTimeout(() => {
+            const post = { body: <div></div> }
+            setPost(post);
+            setIsLoad(false);
+        }, 1500)
+    }, []);
     return (
         <>
 
-            <div className='btn_container'>
-                <div id='container_senseis'>
-                    <span>Sensei: </span>
-                    <select className='sensei_init' onChange={(e) => setSelectSensei(e.target.value)}>
-                        <option value="">Selecione</option>
-                        {senseis.map(itSensei => (
-                            <option value={itSensei.id}>{itSensei.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div id='container_pendinglearners'>
-                    <span className='onlyPendingLearners'> pagamentos pendentes:</span>
-                    <input
-                        className='onlyPendingcheckbox'
-                        type="checkbox"
-                        onClick={() => setOnlyPendingLearners(!onlyPendingLearners)}
-                        checked={onlyPendingLearners}
-                    />
-                </div>
-                <input type="button" value="+Novo Aluno" id='btn_edit_learner' onClick={openModal} />
-                <label htmlFor="btn_exit">
-                    <button id='btn_exit' onClick={() => handleLogout()}>
-                        <img src={logout} alt="btn_exit" />
-                        <span id='link_exit'>SAIR</span>
-                    </button>
-                </label>
-                <div />
-                <label htmlFor="btn_add">
+            <label htmlFor="btn_add">
 
-                    {modalOpenFatura && (
-                        <div className='backdrop_modal_close'>
-                            <dialog id='dialog' open >
-                                <input type="button" value="X" id='dialog_btn' onClick={closeModalFatura} />
-                                <form id='data' >
-                                    <fieldset className='containerField'>
-                                        {selectRadioFatura === 'sim' ? (
-                                            <fieldset className='containerField'>
-                                                <legend>
-                                                    <span id='title_data'>Registrar Mensalidade</span>
-                                                </legend>
+                {modalOpenFatura && (
+                    <div className='backdrop_modal_close'>
+                        <dialog id='dialog' open >
+                            <input type="button" value="X" id='dialog_btn' onClick={closeModalFatura} />
+                            <form id='data' >
+                                <fieldset className='containerField'>
+                                    {selectRadioFatura === 'sim' ? (
+                                        <fieldset className='containerField'>
+                                            <legend>
+                                                <span id='title_data'>Registrar Mensalidade</span>
+                                            </legend>
 
 
-                                                <p>Valor</p><input type="number" className='boxInput' placeholder='R$' value={price} onChange={e => setPrice(e.target.value)} />
+                                            <p>Valor</p><input type="number" className='boxInput' placeholder='R$' value={price} onChange={e => setPrice(e.target.value)} />
 
-                                                <div className='line'>
-                                                    <p>Observacao</p>
-                                                    <input type="text" className='boxInput' value={newInvoiceObservation} onChange={e => setNewInvoiceObservation(e.target.value)} />
-                                                </div>
-                                                <div id='phone_mail' style={{ width: '100%' }}>
-                                                    <div className='line'>
-                                                        <p>Data de vencimento</p>
-                                                        <input type="date" className='boxInput' value={datedue} onChange={e => setDatedue(e.target.value)} />
-                                                    </div>
-                                                    <p>Status
-                                                        <select style={{ width: '100%', fontSize: '12pt', marginLeft: '5px', marginTop: '7px' }} value={newInvoiceStatus} onChange={optChangePay}>
-                                                            <option value='Selecionar' selected disabled>Selecione</option>
-                                                            <option value='pendente'>Pendente</option>
-                                                            <option value='Pago'>Pago</option>
-                                                        </select>
-                                                    </p>
-                                                </div>
-                                                <div id='buttons_save_back'>
-                                                    <button id='btn_edit_learner' onClick={(e) => {
-                                                        e.preventDefault();
-
-                                                        handleCreateInvoice()
-                                                    }}>
-                                                        <span>Salvar</span>
-                                                    </button>
-                                                    <input type="button" value="Voltar" className='btn_show_bill' onClick={() => setSelectRadioFatura('nao')} />
-                                                    {openModalLoading && (
-                                                        <div className='backdrop'>
-                                                            <dialog className='modalLoading'>
-                                                                <div className='loader'>
-                                                                    <FadeLoader
-                                                                        color='#ffbb00'
-                                                                        size={100}
-                                                                        loading={true}
-                                                                    />
-                                                                </div>
-                                                            </dialog>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </fieldset>
-                                        ) : (
-                                            <div className='backdrop_modal_close'>
-                                                <dialog id='dialog' open className='dialog_new-learner' >
-                                                    <form id='data' >
-                                                        <fieldset className='containerField'>
-                                                            <legend>
-                                                                <input type="button" value="X" id='dialog_btn' onClick={closeModalFatura} />
-                                                                <span id='title_data_text'>Mensalidades Registradas: <br /><br />
-                                                                    {/* <input type="button" value="Adicionar Mensalidade" className='btn_add_bills' onClick={() => setSelectRadioFatura('sim')} /><br /> */}
-
-                                                                    <div id='container_name'>
-                                                                        <span id='learner_id'>
-                                                                            {selectedLearner ?
-                                                                                `${selectedLearner.id} | Aluno: ${selectedLearner.name}` : ''}
-                                                                        </span>
-                                                                    </div>
-                                                                </span>
-                                                            </legend>
-
-                                                            {loadingInvoices ? (
-                                                                <div className='backdrop'>
-                                                                    <dialog className='modalLoading'>
-                                                                        <div className='loader'>
-                                                                            <FadeLoader
-                                                                                color='#ffbb00'
-                                                                                size={100}
-                                                                                loading={true}
-                                                                            />
-                                                                        </div>
-                                                                    </dialog>
-                                                                </div>
-                                                            ) : (
-                                                                <div style={{ overflow: 'scroll' }}>
-                                                                    <Table striped bordered hover size="sm">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th className='table__tittle'>ID</th>
-                                                                                <th className='table__tittle'>Valor</th>
-                                                                                <th className='table__tittle'>Data de vencimento</th>
-                                                                                <th className='table__tittle'>Status</th>
-                                                                                {/* <th className='table__tittle'>Mensalidade extra?</th> */}
-                                                                                <th className='table__tittle'>Observação</th>
-                                                                                <th></th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            {invoices.map(iterationInvoice => (
-                                                                                <tr>
-                                                                                    <td className='back'>{iterationInvoice.id}</td>
-                                                                                    <td className='back'>{FormatCurrency(iterationInvoice.value)}</td>
-                                                                                    <td className='back'>{FormatDate({ date: iterationInvoice.dueDate })}</td>
-                                                                                    <td>{TranslateStatus({ dueDate: new Date(iterationInvoice.dueDate), status: iterationInvoice.status })}</td>
-                                                                                    {/* <td>{iterationInvoice.isExtraInvoice ? 'Sim' : 'Não'}</td> */}
-                                                                                    <td>{iterationInvoice.observation}</td>
-                                                                                    <td>
-                                                                                        {iterationInvoice.status === 'pending' && (
-                                                                                            <button
-                                                                                                type="button"
-                                                                                                style={{ scale: '0.8' }}
-                                                                                                className='button_dell_edit'
-                                                                                                onClick={() => handleMarkAsPaid(iterationInvoice.id, iterationInvoice.isExtraInvoice)}
-                                                                                            >
-                                                                                                <span className='fa-regular fa-pen-to-square'></span>
-                                                                                            </button>
-                                                                                        )}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            ))}
-                                                                        </tbody>
-                                                                    </Table>
-                                                                </div>
-                                                            )}
-                                                        </fieldset>
-                                                    </form>
-                                                </dialog>
+                                            <div className='line'>
+                                                <p>Observacao</p>
+                                                <input type="text" className='boxInput' value={newInvoiceObservation} onChange={e => setNewInvoiceObservation(e.target.value)} />
                                             </div>
-                                        )}
-                                    </fieldset>
-                                </form>
-                            </dialog>
-                        </div>
-                    )}
-                </label >
-            </div >
+                                            <div id='phone_mail' style={{ width: '100%' }}>
+                                                <div className='line'>
+                                                    <p>Data de vencimento</p>
+                                                    <input type="date" className='boxInput' value={datedue} onChange={e => setDatedue(e.target.value)} />
+                                                </div>
+                                                <p>Status
+                                                    <select style={{ width: '100%', fontSize: '12pt', marginLeft: '5px', marginTop: '7px' }} value={newInvoiceStatus} onChange={optChangePay}>
+                                                        <option value='Selecionar' selected disabled>Selecione</option>
+                                                        <option value='pendente'>Pendente</option>
+                                                        <option value='Pago'>Pago</option>
+                                                    </select>
+                                                </p>
+                                            </div>
+                                            <div id='buttons_save_back'>
+                                                <button id='btn_edit_learner' onClick={(e) => {
+                                                    e.preventDefault();
+
+                                                    handleCreateInvoice()
+                                                }}>
+                                                    <span>Salvar</span>
+                                                </button>
+                                                <input type="button" value="Voltar" className='btn_show_bill' onClick={() => setSelectRadioFatura('nao')} />
+                                                {openModalLoading && (
+                                                    <div className='backdrop'>
+                                                        <dialog className='modalLoading'>
+                                                            <div className='loader'>
+                                                                <FadeLoader
+                                                                    color='#ffbb00'
+                                                                    size={100}
+                                                                    loading={true}
+                                                                />
+                                                            </div>
+                                                        </dialog>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </fieldset>
+                                    ) : (
+                                        <div className='backdrop_modal_close'>
+                                            <dialog id='dialog' open className='dialog_new-learner' >
+                                                <form id='data' >
+                                                    <fieldset className='containerField'>
+                                                        <legend>
+                                                            <input type="button" value="X" id='dialog_btn' onClick={closeModalFatura} />
+                                                            <span id='title_data_text'>Mensalidades Registradas: <br /><br />
+                                                                {/* <input type="button" value="Adicionar Mensalidade" className='btn_add_bills' onClick={() => setSelectRadioFatura('sim')} /><br /> */}
+
+                                                                <div id='container_name'>
+                                                                    <span id='learner_id'>
+                                                                        {selectedLearner ?
+                                                                            `${selectedLearner.id} | Aluno: ${selectedLearner.name}` : ''}
+                                                                    </span>
+                                                                </div>
+                                                            </span>
+                                                        </legend>
+
+                                                        {loadingInvoices ? (
+                                                            <div className='backdrop'>
+                                                                <dialog className='modalLoading'>
+                                                                    <div className='loader'>
+                                                                        <FadeLoader
+                                                                            color='#ffbb00'
+                                                                            size={100}
+                                                                            loading={true}
+                                                                        />
+                                                                    </div>
+                                                                </dialog>
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ overflow: 'scroll' }}>
+                                                                <Table striped bordered hover size="sm">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th className='table__tittle'>ID</th>
+                                                                            <th className='table__tittle'>Valor</th>
+                                                                            <th className='table__tittle'>Data de vencimento</th>
+                                                                            <th className='table__tittle'>Status</th>
+                                                                            {/* <th className='table__tittle'>Mensalidade extra?</th> */}
+                                                                            <th className='table__tittle'>Observação</th>
+                                                                            <th></th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {invoices.map(iterationInvoice => (
+                                                                            <tr>
+                                                                                <td className='back'>{iterationInvoice.id}</td>
+                                                                                <td className='back'>{FormatCurrency(iterationInvoice.value)}</td>
+                                                                                <td className='back'>{FormatDate({ date: iterationInvoice.dueDate })}</td>
+                                                                                <td>{TranslateStatus({ dueDate: new Date(iterationInvoice.dueDate), status: iterationInvoice.status })}</td>
+                                                                                {/* <td>{iterationInvoice.isExtraInvoice ? 'Sim' : 'Não'}</td> */}
+                                                                                <td>{iterationInvoice.observation}</td>
+                                                                                <td>
+                                                                                    {iterationInvoice.status === 'pending' && (
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            style={{ scale: '0.8' }}
+                                                                                            className='button_dell_edit'
+                                                                                            onClick={() => handleMarkAsPaid(iterationInvoice.id, iterationInvoice.isExtraInvoice)}
+                                                                                        >
+                                                                                            <span className='fa-regular fa-pen-to-square'></span>
+                                                                                        </button>
+                                                                                    )}
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </Table>
+                                                            </div>
+                                                        )}
+                                                    </fieldset>
+                                                </form>
+                                            </dialog>
+                                        </div>
+                                    )}
+                                </fieldset>
+                            </form>
+                        </dialog>
+                    </div>
+                )}
+            </label >
             <Container>
                 {modalOpen && (
                     <div className='backdrop_modal_close'>
@@ -654,7 +679,7 @@ function Sheets() {
                                                     prefix='R$ '
                                                     placeholder='R$ '
                                                     decimalsLimit={2}
-                                                    onValueChange={(value, name, values) => {setPriceMonthlyFees(values.float)}}
+                                                    onValueChange={(value, name, values) => { setPriceMonthlyFees(values.float) }}
                                                 />
                                                 {/* <CurrencyInput
                                                     
@@ -743,12 +768,12 @@ function Sheets() {
                                         <div className='line' style={{ width: '100%' }}>
                                             <p>Telefone</p>
                                             <input
-                                            type="text"
-                                            className='boxInput'
-                                            placeholder='(     ) ___ ____________-____________ '
-                                            value={editingModalPhone}
-                                            onChange={(e) => setEditingModalPhone(mask(unMask(e.target.value), ['(99) 9999-9999', '(99) 99999-9999']))}
-                                        />
+                                                type="text"
+                                                className='boxInput'
+                                                placeholder='(     ) ___ ____________-____________ '
+                                                value={editingModalPhone}
+                                                onChange={(e) => setEditingModalPhone(mask(unMask(e.target.value), ['(99) 9999-9999', '(99) 99999-9999']))}
+                                            />
                                         </div>
                                     </div>
 
@@ -766,7 +791,7 @@ function Sheets() {
                                                     prefix='R$ '
                                                     placeholder='R$ '
                                                     decimalsLimit={2}
-                                                    onValueChange={(value, name, values) => {setEditingModalPriceMonthlyFees(values.float)}}
+                                                    onValueChange={(value, name, values) => { setEditingModalPriceMonthlyFees(values.float) }}
                                                 />
                                             </div>
                                             <div className='line'>
@@ -834,85 +859,146 @@ function Sheets() {
                         </dialog>
                     </div>
                 )}
-                <div className='template'>
-                    <caption>Alunos Cadastrados<img src={logo_selvagem} alt="logotype" id='logo_2' /></caption>
-                    <Table striped bordered hover size="sm">
-                        <thead>
-                            <tr>
-                                <th className='table__tittle'>Id</th>
-                                <th className='table__tittle'>Nome</th>
-                                <th className='table__tittle'>Telefone</th>
-                                <th className='table__tittle'>Faixa</th>
-                                <th className='table__tittle'>Grau</th>
-                                <th className='table__tittle'>Sensei</th>
-                                <th className='table__tittle'>Mensalidade</th>
-                                <th className='table__tittle'>Ultimo Pagamento</th>
-                                <th className='table__tittle'>Proximos Vencimentos</th>
-                                <th className='table__tittle'>Situação</th>
-                                <th className='table__tittle'></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {learners
-                                .filter(iterationLearner => {
-                                    if (!onlyPendingLearners && !selectSensei)
-                                        return true;
+                <div>
+                    <div className='container-logout_newlearner' data-aos="fade-left" data-aos-duration="3000" data-aos-offset="50">
+                        <div className='container-tittle'>
+                            <span className='tittle'>{compliment}, {nameUser}!</span>
+                        </div>
+                        <input type="button" value="+Novo Aluno" id='btn_edit_learner' onClick={openModal} />
+                        <label htmlFor="btn_exit">
+                            <button id='btn_exit' onClick={() => handleLogout()}>
+                                <img src={logout} alt="btn_exit" className='button_power' />
+                                <span id='link_exit'>SAIR</span>
+                            </button>
+                        </label>
+                    </div>
+                    {isLoad ? (
+                        <div style={{ margin: '-130px 0 0 0' }}>
+                            <Skeleton count={1} style={{ margin: '8px 0 0 0' }} width={'1500px'} height={'50px'} baseColor='rgb(224, 224, 224)' />
+                            <Skeleton count={1} style={{ margin: '8px 0 10px 0' }} width={'1500px'} height={'70px'} baseColor='rgb(224, 224, 224)' />
+                            <Skeleton count={11} style={{ padding: '15px' }} width={'1500px'} height={'20px'} baseColor='rgb(224, 224, 224)' />
+                            <Skeleton count={1} style={{ padding: '15px', borderRadius: '0 0 10px 10px' }} width={'1500px'} height={'20px'} baseColor='rgb(224, 224, 224)' />
+                        </div>
+                    ) : (
+                        <>
+                            {post.body || <Skeleton />}
+                            <div className='template'>
+                                <div className='section-container_sensei-learners'>
+                                    <div className='search-bar_container'>
+                                        <span className='fa-solid fa-magnifying-glass' />
+                                        <input type="text" value={search} className='search' onChange={(e) => setSearch(e.target.value)} placeholder='Buscar Aluno' />
+                                    </div>
+                                    < div className='btn_container'>
+                                        <div id='container_senseis'>
+                                            <span>Sensei: </span><br />
+                                            <select onChange={(e) => setSelectSensei(e.target.value)}>
+                                                <option>Selecione</option>
+                                                {senseis.map(itSensei => (
+                                                    <option value={itSensei.id}>{itSensei.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div id='container_pendinglearners'>
+                                            <span className='text-pendentpay'> Pagamentos pendentes:</span><br />
+                                            <select onChange={() => setOnlyPendingLearners(!onlyPendingLearners)}>
+                                                <option>Selecione</option>
+                                                <option value={onlyPendingLearners}>Mostrar</option>
+                                            </select>
 
-                                    if (onlyPendingLearners) {
-                                        const learnerExpiringDate = new Date(iterationLearner.expiringDate);
+                                        </div>
+                                    </div>
+                                </div>
+                                <caption>Alunos Cadastrados<img src={logo_selvagem} alt="logotype" id='logo_2' /></caption>
+                                <div className='scroll-table'>
+                                    <Table striped bordered hover size="sm">
+                                        <thead>
+                                            <tr>
+                                                <th className='table__tittle'>Id</th>
+                                                <th className='table__tittle'>Nome</th>
+                                                <th className='table__tittle'>Telefone</th>
+                                                <th className='table__tittle'>Faixa</th>
+                                                <th className='table__tittle'>Grau</th>
+                                                <th className='table__tittle'>Sensei</th>
+                                                <th className='table__tittle'>Mensalidade</th>
+                                                <th className='table__tittle'>Ultimo Pagamento</th>
+                                                <th className='table__tittle'>Proximos Vencimentos</th>
+                                                <th className='table__tittle'>Situação</th>
+                                                <th className='table__tittle'></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {learners
+                                                .filter(iterationLearner => {
+                                                    if (search) {
+                                                        const normalizedSearch = normalize(search);
+                                                        const normalizedName = normalize(iterationLearner.name);
 
-                                        const now = new Date();
+                                                        if (!normalizedName.includes(normalizedSearch))
+                                                            return false;
+                                                    }
 
-                                        const isPending = isToday(learnerExpiringDate) || learnerExpiringDate < now;
+                                                    if (!onlyPendingLearners && !selectSensei)
+                                                        return true;
 
-                                        if (!isPending)
-                                            return false;
-                                    }
+                                                    if (onlyPendingLearners) {
+                                                        const learnerExpiringDate = new Date(iterationLearner.expiringDate);
 
-                                    if (selectSensei) {
-                                        const isLearnerFromSelectedSensei = iterationLearner.senseiId === +selectSensei;
+                                                        const now = new Date();
 
-                                        if (!isLearnerFromSelectedSensei)
-                                            return false;
-                                    }
+                                                        const isPending = isToday(learnerExpiringDate) || learnerExpiringDate < now;
 
-                                    return true;
-                                })
-                                .map(iterationLearner => (
-                                    <tr key={iterationLearner.id}>
-                                        <td>{iterationLearner.id}</td>
-                                        <td>{iterationLearner.name}</td>
-                                        <td>{mask(iterationLearner.phone, ['(99) 9999-9999', '(99) 99999-9999'])}</td>
-                                        <td style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                        }}>
-                                            <div
-                                                id={iterationLearner.beltColor}
-                                                className='selection-color'
-                                                style={{
-                                                    width: '60%',
-                                                }}
-                                            />
-                                        </td>
-                                        <td>{iterationLearner.degree}</td>
-                                        <td>{renderSensei(iterationLearner.senseiId)}</td>
-                                        <td>{FormatCurrency(iterationLearner.subscriptionPrice)}</td>
-                                        <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
-                                        <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
-                                        <td>{renderSituation(iterationLearner.expiringDate)}</td>
-                                        <td>
-                                            <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
-                                            <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }}></span></label></button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </Table>
+                                                        if (!isPending)
+                                                            return false;
+                                                    }
+
+                                                    if (selectSensei) {
+                                                        const isLearnerFromSelectedSensei = iterationLearner.senseiId === +selectSensei;
+
+                                                        if (!isLearnerFromSelectedSensei)
+                                                            return false;
+                                                    }
+
+                                                    return true;
+                                                })
+                                                .map(iterationLearner => (
+                                                    <tr key={iterationLearner.id}>
+                                                        <td>{iterationLearner.id}</td>
+                                                        <td>{iterationLearner.name}</td>
+                                                        <td>{mask(iterationLearner.phone, ['(99) 9999-9999', '(99) 99999-9999'])}</td>
+                                                        <td style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                        }}>
+                                                            <div
+                                                                id={iterationLearner.beltColor}
+                                                                className='selection-color'
+                                                                style={{
+                                                                    width: '60%',
+                                                                }}
+                                                            />
+                                                        </td>
+                                                        <td>{iterationLearner.degree}</td>
+                                                        <td>{renderSensei(iterationLearner.senseiId)}</td>
+                                                        <td>{FormatCurrency(iterationLearner.subscriptionPrice)}</td>
+                                                        <td>{FormatDate({ date: iterationLearner.renewalDate })}</td>
+                                                        <td>{FormatDate({ date: iterationLearner.expiringDate })}</td>
+                                                        <td>{renderSituation(iterationLearner.expiringDate)}</td>
+                                                        <td>
+                                                            <button className='button_dell_edit' onClick={() => openModalFatura(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-money-bill-1' style={{ color: 'white', position: 'relative', top: '1px' }}></span></label></button>
+                                                            <button className='button_dell_edit' onClick={() => handleOpenEditingModal(iterationLearner)}><label htmlFor="button_dell_edit"><span className='fa-regular fa-pen-to-square' style={{ position: 'relative', left: '2px', top: '0px', color: 'white' }}></span></label></button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
                 <Footer />
-            </ Container>
+            </ Container >
         </>
     )
 }
