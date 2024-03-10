@@ -64,12 +64,12 @@ h1 p {
 
 #container_pendinglearners {
     display: inline;
-   
+
     margin: 0 15px;
     font-size: 13px;
 }
 
-#container_pendinglearners select{
+#container_pendinglearners select {
     width: 100%;
 }
 
@@ -326,7 +326,7 @@ div .template {
     margin: auto 15px;
     opacity: 1;
     transition: 0.6s;
-    
+
 }
 
 #btn_exit:hover {
@@ -812,6 +812,7 @@ span#title_data {
         margin: 0 10px;
         font-size: 8pt;
     }
+
     .container-tittle {
         display: flex;
         align-items: center;
@@ -845,19 +846,19 @@ span#title_data {
         margin-left: 100px;
     }
 
-    #container_pendinglearners select{
+    #container_pendinglearners select {
         display: flex;
         width: 90%;
         padding-left: 0px;
     }
-    
+
     .onlyPendingcheckbox {
         margin-right: 0px;
         position: relative;
         right: 60px;
         top: 40px;
     }
-    
+
     .onlyPendingLearners {
         position: relative;
         top: 30px;
@@ -886,6 +887,7 @@ span#title_data {
         position: relative;
         right: 0px;
         bottom: 0px;
+        top: 350px;
         font-size: 12pt;
         border-left: 1px var(--white) solid;
         border-right: 1px var(--white) solid;
@@ -898,7 +900,7 @@ span#title_data {
 
     .template caption {
         position: relative;
-    
+
     }
 
     .template img#logo_2 {
@@ -980,12 +982,12 @@ span#title_data {
         margin-left: 10px;
         width: 100%;
     }
-    
+
     .scroll-table {
         display: flex;
         width: 100%;
     }
-    
+
     .button_dell_edit {
         padding: auto;
         scale: 0.7;
@@ -1004,7 +1006,7 @@ span#title_data {
         opacity: 1;
         transition: 1s;
     }
-    
+
     #buttons_save_back {
         width: 100%;
         margin: 30px 0 0 0;
@@ -1012,7 +1014,7 @@ span#title_data {
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .btn_show_bill {
         background-color: #ffbb00;
         padding: 0px 15px;
@@ -1027,19 +1029,19 @@ span#title_data {
         border-top: none;
         border-radius: 20px;
         animation: slide 1s linear forwards;
-        
+
     }
-    
+
     @keyframes slide {
         0% {
             opacity: 0;
         }
-        
+
         100% {
             opacity: 1;
         }
     }
-    
+
     div.template {
         margin-top: -200px;
         position: relative;
